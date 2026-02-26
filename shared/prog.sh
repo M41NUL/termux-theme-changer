@@ -23,7 +23,7 @@ progress_bar() {
     local GREEN=$'\033[1;32m'
     local RESET=$'\033[0m'
 
-    # লাইন যেন ছোট বড় না হয় তাই স্পেস ফিক্স করা হলো
+    
     local task_padded=$(printf "%-25s" "${task:0:25}")
 
     for i in $(seq 0 100); do
