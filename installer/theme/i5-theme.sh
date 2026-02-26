@@ -151,18 +151,14 @@ fi
 
 echo -e "\n"
 echo -e "  ${c3}╔═══════════════════════╗${c0}  ${c3}${USER}${c5}@${c3}${HOST}${c0}"
-echo -e "  ${c3}║${c0} ${COLORED_NAME}${SPACES}${c5}●${c0} ${c6}●${c0} ${c7}●${c0} ${c3}║${c0}  "
+echo -e "  ${c3}║${c0} ${COLORED_NAME}  ${c5}●${c0} ${c6}●${c0} ${c7}●${c0}${SPACES}${c3}║${c0}  "
 echo -e "  ${c3}╠═══════════════════════╣${c0}  ${c1}phone ${c0}: ${MODEL}"
 echo -e "  ${c3}║${c0}                       ${c3}║${c0}  ${c2}os    ${c0}: ${OS}"
 echo -e "  ${c3}║${c0}         ${c3}. .${c0}           ${c3}║${c0}  ${c7}ker   ${c0}: ${KERNEL}"
 echo -e "  ${c3}║${c0}         ${c6}██${c0}            ${c3}║${c0}  ${c4}pkgs  ${c0}: ${PKGS}"
-echo -e "  ${c3}║${c0}         ${c3}█${c0}${c8}'\\'${c0}           ${c3}║${c0}  ${c5}sh    ${c0}: ${SHELL_NAME}"
-echo -e "  ${c3}║${c0}        ${c6}█${c8}\\_;/${c6}█${c0}          ${c3}║${c0}  ${c6}up    ${c0}: ${UPTIME}"
+echo -e "  ${c3}║${c0}         ${c3}█${c0} ${c8}'\\'${c0}         ${c3}║${c0}  ${c5}sh    ${c0}: ${SHELL_NAME}"
+echo -e "  ${c3}║${c0}        ${c6}█${c0} ${c8}\\_;/ ${c6}█${c0}       ${c3}║${c0}  ${c6}up    ${c0}: ${UPTIME}"
 echo -e "  ${c3}║${c0}                       ${c3}║${c0}  ${c1}ram   ${c0}: ${RAM}"
 echo -e "  ${c3}║${c0}   ${c3}android${c0} ${c1}♥${c0} ${c3}termux${c0}    ${c3}║${c0}  ${c2}disk  ${c0}: ${DISK}"
 echo -e "  ${c3}╚═══════════════════════╝${c0}  ${c1}━━${c2}━━${c6}━━${c4}━━${c5}━━${c7}━━${c3}━━${c8}━━${c0}"
 echo -e "\n"
-EOF
-
-chmod +x "$RXFETCH_SH"
-info "Theme setup completed!"
