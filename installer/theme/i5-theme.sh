@@ -117,9 +117,13 @@ SPACES=$(printf '%*s' "$SPACE_LEN" '')
 
 USER=$(whoami 2>/dev/null || echo "user")
 HOST=$(getprop ro.product.board 2>/dev/null || echo "android")
+
+# Extra spaces removed and variables cut to prevent breaking
 MODEL="$(getprop ro.product.brand 2>/dev/null) $(getprop ro.product.model 2>/dev/null)"
+MODEL=$(echo "$MODEL" | awk '{$1=$1;print}' | cut -c1-22)
 OS="Android $(getprop ro.build.version.release 2>/dev/null) $(uname -m 2>/dev/null)"
-KERNEL=$(uname -r 2>/dev/null)
+OS=$(echo "$OS" | awk '{$1=$1;print}' | cut -c1-22)
+KERNEL=$(uname -r 2>/dev/null | cut -c1-22)
 PKGS=$(pkg list-installed 2>/dev/null | wc -l)
 SHELL_NAME=$(basename "$SHELL")
 UPTIME=$(uptime -p 2>/dev/null | sed 's/up //')
@@ -147,14 +151,14 @@ fi
 echo -e "\n"
 echo -e "  ${c3}┌───────────────────────┐${c0}  ${c3}${USER}${c5}@${c3}${HOST}${c0}"
 echo -e "  ${c3}│${c0} ${COLORED_NAME}${SPACES}${c5}●${c0}  ${c6}●${c0}  ${c7}●${c0} ${c3}│${c0}  "
-echo -e "  ${c3}├───────────────────────┤${c0}  ${c1}phone${c0}  ${MODEL}"
-echo -e "  ${c3}│${c0}                       ${c3}│${c0}  ${c2}os${c0}     ${OS}"
-echo -e "  ${c3}│${c0}         ${c3}. .${c0}           ${c3}│${c0}  ${c7}ker${c0}    ${KERNEL}"
-echo -e "  ${c3}│${c0}         ${c6}██${c0}            ${c3}│${c0}  ${c4}pkgs${c0}   ${PKGS}"
-echo -e "  ${c3}│${c0}         ${c3}█${c0}${c8}'\\'${c0}           ${c3}│${c0}  ${c5}sh${c0}     ${SHELL_NAME}"
-echo -e "  ${c3}│${c0}        ${c6}█${c8}\\_;/${c6}█${c0}          ${c3}│${c0}  ${c6}up${c0}     ${UPTIME}"
-echo -e "  ${c3}│${c0}                       ${c3}│${c0}  ${c1}ram${c0}    ${RAM}"
-echo -e "  ${c3}│${c0}   ${c3}android${c0} ${c1}♥${c0} ${c3}termux${c0}    ${c3}│${c0}  ${c2}disk${c0}   ${DISK}"
+echo -e "  ${c3}├───────────────────────┤${c0}  ${c1}phone ${c0}: ${MODEL}"
+echo -e "  ${c3}│${c0}                       ${c3}│${c0}  ${c2}os    ${c0}: ${OS}"
+echo -e "  ${c3}│${c0}         ${c3}. .${c0}           ${c3}│${c0}  ${c7}ker   ${c0}: ${KERNEL}"
+echo -e "  ${c3}│${c0}         ${c6}██${c0}            ${c3}│${c0}  ${c4}pkgs  ${c0}: ${PKGS}"
+echo -e "  ${c3}│${c0}         ${c3}█${c0}${c8}'\\'${c0}           ${c3}│${c0}  ${c5}sh    ${c0}: ${SHELL_NAME}"
+echo -e "  ${c3}│${c0}        ${c6}█${c8}\\_;/${c6}█${c0}          ${c3}│${c0}  ${c6}up    ${c0}: ${UPTIME}"
+echo -e "  ${c3}│${c0}                       ${c3}│${c0}  ${c1}ram   ${c0}: ${RAM}"
+echo -e "  ${c3}│${c0}   ${c3}android${c0} ${c1}♥${c0} ${c3}termux${c0}    ${c3}│${c0}  ${c2}disk  ${c0}: ${DISK}"
 echo -e "  ${c3}└───────────────────────┘${c0}  ${c1}━━${c2}━━${c6}━━${c4}━━${c5}━━${c7}━━${c3}━━${c8}━━${c0}"
 echo -e "\n"
 EOF
