@@ -16,14 +16,15 @@ success() { printf "\e[1;32m[✓]\e[0m %s\n" "$1"; }
 progress_bar() {
     local task="$1"
     local duration="${2:-2}"
-    local width=40
+    local width=15
     local char="█"
 
     local YELLOW=$'\033[1;33m'
     local GREEN=$'\033[1;32m'
     local RESET=$'\033[0m'
 
-    local term_width=$(tput cols)
+    # লাইন যেন ছোট বড় না হয় তাই স্পেস ফিক্স করা হলো
+    local task_padded=$(printf "%-25s" "${task:0:25}")
 
     for i in $(seq 0 100); do
         local step=$((i * width / 100))
@@ -32,13 +33,7 @@ progress_bar() {
         local color="$YELLOW"
         (( i == 100 )) && color="$GREEN"
 
-        local prog_text="[$bar$space] $i%"
-        local pad=$((term_width - ${#task} - ${#prog_text} - 5))
-        ((pad<0)) && pad=0
-        local padding=$(printf "%*s" "$pad" "")
-
-        printf "\r[*] %s%s%s%s" "$task" "$padding" "$color" "$prog_text$RESET"
-
+        printf "\r[*] %s %s[%s] %3d%%%s" "$task_padded" "$color" "$bar$space" "$i" "$RESET"
         sleep "$(awk "BEGIN {print $duration/100}")"
     done
     echo
