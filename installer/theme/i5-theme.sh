@@ -8,7 +8,6 @@
 #Gmail: githubmainul@gmail.com
 #=======================================
 
-
 BASE="$HOME/termux-theme-changer"
 PLUGINS_DIR="$BASE/plugins"
 TERMUX_DIR="$HOME/.termux"
@@ -72,7 +71,9 @@ echo -e "\e[1;36m└────────────────────
 echo -ne "\e[1;32m❯ Enter Your Fetch Name (e.g. mainul-x): \e[0m"
 read -r INPUT_NAME
 
+# Default name setup and limit character length to 14 to prevent box breaking
 FETCH_NAME=${INPUT_NAME:-mainul-x}
+FETCH_NAME=$(echo "$FETCH_NAME" | cut -c1-14)
 echo -e "\e[1;36m[*] Banner name set to:\e[0m \e[1;35m$FETCH_NAME\e[0m\n"
 
 progress_bar "Generating theme scripts" 2
@@ -109,9 +110,9 @@ for (( i=0; i<${#NAME}; i++ )); do
 done
 COLORED_NAME="${COLORED_NAME}${c0}"
 
+# Exact spacing calculation to keep the right border perfect
 NAME_LEN=${#NAME}
-BOX_WIDTH=23
-SPACE_LEN=$((BOX_WIDTH - NAME_LEN - 6))
+SPACE_LEN=$((16 - NAME_LEN))
 if [ "$SPACE_LEN" -lt 1 ]; then SPACE_LEN=1; fi
 SPACES=$(printf '%*s' "$SPACE_LEN" '')
 
@@ -149,17 +150,17 @@ else
 fi
 
 echo -e "\n"
-echo -e "  ${c3}┌───────────────────────┐${c0}  ${c3}${USER}${c5}@${c3}${HOST}${c0}"
-echo -e "  ${c3}│${c0} ${COLORED_NAME}${SPACES}${c5}●${c0}  ${c6}●${c0}  ${c7}●${c0} ${c3}│${c0}  "
-echo -e "  ${c3}├───────────────────────┤${c0}  ${c1}phone ${c0}: ${MODEL}"
-echo -e "  ${c3}│${c0}                       ${c3}│${c0}  ${c2}os    ${c0}: ${OS}"
-echo -e "  ${c3}│${c0}         ${c3}. .${c0}           ${c3}│${c0}  ${c7}ker   ${c0}: ${KERNEL}"
-echo -e "  ${c3}│${c0}         ${c6}██${c0}            ${c3}│${c0}  ${c4}pkgs  ${c0}: ${PKGS}"
-echo -e "  ${c3}│${c0}         ${c3}█${c0}${c8}'\\'${c0}           ${c3}│${c0}  ${c5}sh    ${c0}: ${SHELL_NAME}"
-echo -e "  ${c3}│${c0}        ${c6}█${c8}\\_;/${c6}█${c0}          ${c3}│${c0}  ${c6}up    ${c0}: ${UPTIME}"
-echo -e "  ${c3}│${c0}                       ${c3}│${c0}  ${c1}ram   ${c0}: ${RAM}"
-echo -e "  ${c3}│${c0}   ${c3}android${c0} ${c1}♥${c0} ${c3}termux${c0}    ${c3}│${c0}  ${c2}disk  ${c0}: ${DISK}"
-echo -e "  ${c3}└───────────────────────┘${c0}  ${c1}━━${c2}━━${c6}━━${c4}━━${c5}━━${c7}━━${c3}━━${c8}━━${c0}"
+echo -e "  ${c3}╔═══════════════════════╗${c0}  ${c3}${USER}${c5}@${c3}${HOST}${c0}"
+echo -e "  ${c3}║${c0} ${COLORED_NAME}${SPACES}${c5}●${c0} ${c6}●${c0} ${c7}●${c0} ${c3}║${c0}  "
+echo -e "  ${c3}╠═══════════════════════╣${c0}  ${c1}phone ${c0}: ${MODEL}"
+echo -e "  ${c3}║${c0}                       ${c3}║${c0}  ${c2}os    ${c0}: ${OS}"
+echo -e "  ${c3}║${c0}         ${c3}. .${c0}           ${c3}║${c0}  ${c7}ker   ${c0}: ${KERNEL}"
+echo -e "  ${c3}║${c0}         ${c6}██${c0}            ${c3}║${c0}  ${c4}pkgs  ${c0}: ${PKGS}"
+echo -e "  ${c3}║${c0}         ${c3}█${c0}${c8}'\\'${c0}           ${c3}║${c0}  ${c5}sh    ${c0}: ${SHELL_NAME}"
+echo -e "  ${c3}║${c0}        ${c6}█${c8}\\_;/${c6}█${c0}          ${c3}║${c0}  ${c6}up    ${c0}: ${UPTIME}"
+echo -e "  ${c3}║${c0}                       ${c3}║${c0}  ${c1}ram   ${c0}: ${RAM}"
+echo -e "  ${c3}║${c0}   ${c3}android${c0} ${c1}♥${c0} ${c3}termux${c0}    ${c3}║${c0}  ${c2}disk  ${c0}: ${DISK}"
+echo -e "  ${c3}╚═══════════════════════╝${c0}  ${c1}━━${c2}━━${c6}━━${c4}━━${c5}━━${c7}━━${c3}━━${c8}━━${c0}"
 echo -e "\n"
 EOF
 
