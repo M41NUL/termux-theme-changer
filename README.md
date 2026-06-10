@@ -75,17 +75,69 @@
 
 > One-time setup — clones the repo and creates the `ttc` command globally.
 
+**Step 1 — Clone the repo**
+
 ```bash
-rm -rf termux-theme-changer && pkg install git -y && git clone https://github.com/M41NUL/termux-theme-changer.git && cd termux-theme-changer && bash setup.sh
+git clone https://github.com/M41NUL/termux-theme-changer.git
+cd termux-theme-changer
 ```
 
-After setup, just type `ttc` from anywhere:
+**Step 2 — Run setup**
+
+```bash
+bash setup.sh
+```
+
+The setup will:
+
+- Install any missing required tools automatically
+- Set up ZSH plugins, Nerd Font, and color theme
+- Create the `ttc` global command
+- Add auto-update hook to `.zshrc`
+- Auto-launch TTC after setup completes
+
+**Step 3 — Run anytime after install**
 
 ```bash
 ttc
 ```
 
+**Re-install / Update manually**
+
+```bash
+cd termux-theme-changer
+bash setup.sh
+```
+
 > **Recommended:** Run on a fresh Termux installation for best results.
+
+<br>
+
+## Uninstall
+
+**Remove TTC folder:**
+
+```bash
+rm -rf ~/termux-theme-changer
+```
+
+**Remove the `ttc` global command:**
+
+```bash
+rm -f $PREFIX/bin/ttc
+```
+
+**Remove ZSH config (optional):**
+
+```bash
+rm -f ~/.zshrc ~/.zsh_history ~/.profile
+```
+
+**Or use the built-in restore script to reset everything:**
+
+```bash
+bash ~/restore.sh
+```
 
 <br>
 
@@ -202,16 +254,6 @@ termux-theme-changer/
 | **YouTube** | [youtube.com/@codexm41nul](https://youtube.com/@codexm41nul) |
 | **WhatsApp** | [+8801308850528](https://wa.me/8801308850528) |
 | **Email** | [devmainulislam@gmail.com](mailto:devmainulislam@gmail.com) |
-
-<br>
-
-## Special Thanks
-
-- [mayTermux](https://github.com/mayTermux) — inspiration for look and UI.
-- [Termux](https://termux.dev/) — Android terminal platform.
-- [Bash](https://www.gnu.org/software/bash/) — shell scripting.
-- [Zsh](https://www.zsh.org/) — modern shell for prompt customization.
-- All open-source communities for their support.
 
 <br>
 
