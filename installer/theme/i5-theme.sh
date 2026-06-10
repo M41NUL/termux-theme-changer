@@ -125,7 +125,7 @@ done
 COLORED_NAME="${COLORED_NAME}${c0}"
 
 NAME_LEN=${#MY_NAME}
-GAP=$((22 - NAME_LEN - 7))
+GAP=$((22 - NAME_LEN - 8))
 if [ $GAP -lt 1 ]; then GAP=1; fi
 SPACES=$(printf '%*s' "$GAP" '')
 
@@ -198,7 +198,7 @@ function getDiskUsage() {
 
 getCodeName; getClientBase; getModel; getDistro; getKernel
 getTotalPackages; getShell; getUptime; getMemoryUsage; getDiskUsage
-user_host="${c3}${USER}${c5}@${c3}${codename}${c0}"
+user_host="${c3}${MY_NAME}${c5}@${c2}root${c0} ${c3}${codename}${c0}"
 
 echo -e "\n\n"
 echo -e "  ┏━━━━━━━━━━━━━━━━━━━━━━┓"
@@ -210,7 +210,7 @@ echo -e "  ┃          ${c8}${c9}oo${c0}${c8}|${c0}         ┃  ${c4}pkgs${c0}
 echo -e "  ┃         ${c8}/${c10} ${c0}${c8}'\'${c0}        ┃  ${c5}sh${c0}     ${shell}"
 echo -e "  ┃        ${c9}(${c8}\_;/${c9})${c0}        ┃  ${c6}up${c0}     ${uptime}"
 echo -e "  ┃                      ┃  ${c1}ram${c0}    ${memory}"
-echo -e "  ┃   4NDRO1D ${c1}💗${c0} T3RMUX   ┃  ${c2}disk${c0}   ${storage}"
+echo -e "  ┃  android ${c1}💗${c0} termux  ┃  ${c2}disk${c0}   ${storage}"
 echo -e "  ┃                      ┃"
 echo -e "  ┗━━━━━━━━━━━━━━━━━━━━━━┛  ${c1}━━━${c2}━━━${c3}━━━${c4}━━━${c5}━━━${c6}━━━${c7}━━━"
 echo -e "\n\n"
