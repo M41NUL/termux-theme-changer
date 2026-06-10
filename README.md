@@ -61,6 +61,7 @@
 - **Auto-install** — missing tools (`git`, `zsh`, `figlet`, `fzf`, etc.) are installed automatically on first run.
 - **Auto-update** — checks GitHub on every `ttc` launch and pulls the latest version silently.
 - **Force Update** option in menu for immediate sync.
+- **Auto-size UI** — all boxes auto-fit to your terminal width.
 - Fully customized ZSH prompt with colors and modern aesthetics.
 - ZSH plugins: autosuggestions, syntax-highlighting, autocomplete, fzf, bgnotify.
 - `logo-ls` integration for a modern `ls` experience with icons.
@@ -75,10 +76,7 @@
 > One-time setup — clones the repo and creates the `ttc` command globally.
 
 ```bash
-pkg install git -y
-git clone https://github.com/M41NUL/termux-theme-changer.git
-cd termux-theme-changer
-bash setup.sh
+rm -rf termux-theme-changer && pkg install git -y && git clone https://github.com/M41NUL/termux-theme-changer.git && cd termux-theme-changer && bash setup.sh
 ```
 
 After setup, just type `ttc` from anywhere to launch:
@@ -95,15 +93,40 @@ ttc
 
 ```
 ttc
- ├── [1] Auto-install missing dependencies
- ├── [2] Auto-update from GitHub (checks commit hash)
- └── [3] Menu
-      ├── 01 → Start Theme Installation
-      ├── 02 → Developer Profile
-      ├── 03 → About This Tool
-      ├── 04 → Force Update from GitHub
-      └── 00 → Exit
+ |
+ +-- [1] Auto-install missing dependencies
+ +-- [2] Auto-update from GitHub (checks commit hash)
+ +-- [3] Menu
+      |
+      +-- 01 >> Start Theme Installation
+      +-- 02 >> Developer Profile
+      +-- 03 >> About This Tool
+      +-- 04 >> Force Update from GitHub
+      +-- 00 >> Exit
 ```
+
+<br>
+
+## How Auto-Update Works
+
+Every time `ttc` launches, it runs two checks:
+
+1. **On launch** — compares local commit hash with GitHub's latest. If different, pulls automatically.
+2. **Background fetch** (via `.zshrc` hook) — silently fetches in the background so the next launch is faster.
+
+Use **Option 04 → Force Update** to do a hard reset to the latest GitHub version at any time.
+
+<br>
+
+## How Auto-Install Works
+
+On every `ttc` launch, the tool checks for these required packages:
+
+```
+git  curl  zsh  figlet  fzf  neofetch
+```
+
+Any missing package is installed automatically via `pkg install` — no user input needed.
 
 <br>
 

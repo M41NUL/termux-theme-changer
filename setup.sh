@@ -17,17 +17,40 @@ BIN_LINK="$PREFIX/bin/ttc"
 R='\033[1;31m'; G='\033[1;32m'; Y='\033[1;33m'
 C='\033[1;36m'; W='\033[1;37m'; RESET='\033[0m'
 
+_box_width() {
+    local cols
+    cols=$(tput cols 2>/dev/null || echo 50)
+    [ "$cols" -gt 70 ] && cols=70
+    [ "$cols" -lt 30 ] && cols=30
+    echo "$cols"
+}
+box_line() {
+    local char="$1" color="${2:-$C}" w inner line
+    w=$(_box_width); inner=$(( w - 2 ))
+    line=$(printf '%*s' "$inner" '' | tr ' ' "$char")
+    printf "${color}+%s+${RESET}\n" "$line"
+}
+box_row() {
+    local text="$1" color="${2:-$C}"
+    local w inner plain plen pad
+    w=$(_box_width); inner=$(( w - 4 ))
+    plain=$(printf '%s' "$text" | sed 's/\x1b\[[0-9;]*m//g')
+    plen=${#plain}; pad=$(( inner - plen ))
+    [ "$pad" -lt 0 ] && pad=0
+    printf "${color}|${RESET} %s%*s ${color}|${RESET}\n" "$text" "$pad" ''
+}
+
 clear
-echo -e ""
-echo -e "  ${C}╔══════════════════════════════════════════╗${RESET}"
-echo -e "  ${C}║${RESET}      ${W}MAINUL-X TTC SETUP INSTALLER${RESET}        ${C}║${RESET}"
-echo -e "  ${C}╚══════════════════════════════════════════╝${RESET}"
-echo -e ""
+echo ""
+box_line "-" "$C"
+box_row "      ${W}MAINUL-X TTC SETUP INSTALLER${RESET}" "$C"
+box_line "-" "$C"
+echo ""
 
 info()    { printf "  ${C}[*]${RESET} %s\n" "$1"; }
-success() { printf "  ${G}[✓]${RESET} %s\n" "$1"; }
+success() { printf "  ${G}[+]${RESET} %s\n" "$1"; }
 warn()    { printf "  ${Y}[!]${RESET} %s\n" "$1"; }
-error()   { printf "  ${R}[✗]${RESET} %s\n" "$1"; exit 1; }
+error()   { printf "  ${R}[-]${RESET} %s\n" "$1"; exit 1; }
 
 # ── 1. Install git if missing ──
 if ! command -v git >/dev/null 2>&1; then
@@ -64,7 +87,7 @@ cat > "$BIN_LINK" <<EOF
 exec bash "\$HOME/termux-theme-changer/ttc.sh" "\$@"
 EOF
 chmod +x "$BIN_LINK"
-success "'ttc' command created — you can now just type: ttc"
+success "'ttc' command created — type: ttc"
 
 # ── 5. Add zshrc background update hook ──
 ZSHRC="$HOME/.zshrc"
@@ -82,12 +105,12 @@ fi
 
 # ── 6. Done ──
 echo ""
-echo -e "  ${C}╔══════════════════════════════════════════╗${RESET}"
-echo -e "  ${C}║${RESET}       ${G}SETUP COMPLETE! LAUNCHING TTC...${RESET}     ${C}║${RESET}"
-echo -e "  ${C}╠══════════════════════════════════════════╣${RESET}"
-echo -e "  ${C}║${RESET}  ${Y}▶ Auto-update runs on every launch${RESET}       ${C}║${RESET}"
-echo -e "  ${C}║${RESET}  ${Y}▶ GitHub:${RESET} ${C}github.com/M41NUL${RESET}              ${C}║${RESET}"
-echo -e "  ${C}╚══════════════════════════════════════════╝${RESET}"
+box_line "-" "$C"
+box_row "       ${G}SETUP COMPLETE! LAUNCHING TTC...${RESET}" "$C"
+box_line "=" "$C"
+box_row "  ${Y}> Auto-update runs on every launch${RESET}" "$C"
+box_row "  ${Y}> GitHub: ${C}github.com/M41NUL${RESET}" "$C"
+box_line "-" "$C"
 echo ""
 sleep 1.5
 

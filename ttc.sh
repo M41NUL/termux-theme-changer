@@ -26,13 +26,58 @@ DIM=$'\033[2m'
 RS=$'\033[0m'
 
 info()    { printf "${OR}[*]${RS} %s\n" "$1"; }
-success() { printf "${GR}[✓]${RS} %s\n" "$1"; }
+success() { printf "${GR}[+]${RS} %s\n" "$1"; }
 warn()    { printf "${OR}[!]${RS} %s\n" "$1"; }
-error()   { printf "${RD}[✗]${RS} %s\n" "$1"; }
-step()    { printf "\n${GR}[→]${RS} ${W}%s${RS}\n" "$1"; }
+error()   { printf "${RD}[-]${RS} %s\n" "$1"; }
+step()    { printf "\n${GR}[>]${RS} ${W}%s${RS}\n" "$1"; }
+
+# ── Auto-size box helpers ──
+_box_width() {
+    local cols
+    cols=$(tput cols 2>/dev/null || echo 50)
+    [ "$cols" -gt 70 ] && cols=70
+    [ "$cols" -lt 30 ] && cols=30
+    echo "$cols"
+}
+box_top() {
+    local color="${1:-$GR}" w inner line
+    w=$(_box_width); inner=$(( w - 2 ))
+    line=$(printf '%*s' "$inner" '' | tr ' ' '-')
+    printf "${color}+%s+${RS}\n" "$line"
+}
+box_div() {
+    local color="${1:-$GR}" w inner line
+    w=$(_box_width); inner=$(( w - 2 ))
+    line=$(printf '%*s' "$inner" '' | tr ' ' '=')
+    printf "${color}+%s+${RS}\n" "$line"
+}
+box_bot() { box_top "$@"; }
+box_empty() {
+    local color="${1:-$GR}" w inner
+    w=$(_box_width); inner=$(( w - 2 ))
+    printf "${color}|${RS}%*s${color}|${RS}\n" "$inner" ''
+}
+box_row() {
+    local text="$1" color="${2:-$GR}" align="${3:-l}"
+    local w inner plain plen pad lpad rpad
+    w=$(_box_width); inner=$(( w - 4 ))
+    plain=$(printf '%s' "$text" | sed 's/\x1b\[[0-9;]*m//g')
+    plen=${#plain}; pad=$(( inner - plen ))
+    [ "$pad" -lt 0 ] && pad=0
+    case "$align" in
+        c) lpad=$(( pad / 2 )); rpad=$(( pad - lpad )) ;;
+        r) lpad=$pad; rpad=0 ;;
+        *) lpad=0; rpad=$pad ;;
+    esac
+    printf "${color}|${RS} "
+    printf '%*s' "$lpad" ''
+    printf '%s' "$text"
+    printf '%*s' "$rpad" ''
+    printf " ${color}|${RS}\n"
+}
 
 # ──────────────────────────────────────
-# PROGRESS BAR (Termux safe - no \r issue)
+# PROGRESS BAR
 # ──────────────────────────────────────
 progress_bar() {
     local task="$1"
@@ -58,23 +103,23 @@ progress_bar() {
 }
 
 # ──────────────────────────────────────
-# BANNER  (fixed width = 44 inner chars)
+# BANNER
 # ──────────────────────────────────────
 show_banner() {
     clear
     echo ""
-    echo -e "${GR}  ╔════════════════════════════════════════╗${RS}"
-    echo -e "${GR}  ║${RS}                                        ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}  ${RD} _____ _____ _____${RS}                   ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}  ${OR}|_   _|_   _/ ____|${RS}                  ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}  ${GR}  | |   | || |     ${RS}  ${W}Termux Theme${RS}   ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}  ${OR}  | |   | || |___  ${RS}  ${W}Changer v${CURRENT_VERSION}${RS} ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}  ${RD}  |_|   |_| \_____|${RS}                  ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}                                        ${GR}║${RS}"
-    echo -e "${GR}  ╠════════════════════════════════════════╣${RS}"
-    echo -e "${GR}  ║${RS}  ${DIM}Owner${RS} : ${OR}CODEX-M41NUL${RS}  ${DIM}Dev${RS}: ${W}M41NUL${RS}        ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}  ${DIM}GitHub${RS}: ${GR}github.com/M41NUL${RS}               ${GR}║${RS}"
-    echo -e "${GR}  ╚════════════════════════════════════════╝${RS}"
+    box_top "$GR"
+    box_empty "$GR"
+    box_row "  ${RD} _____ _____ _____${RS}" "$GR"
+    box_row "  ${OR}|_   _|_   _/ ____|${RS}" "$GR"
+    box_row "  ${GR}  | |   | || |     ${RS}  ${W}Termux Theme${RS}" "$GR"
+    box_row "  ${OR}  | |   | || |___  ${RS}  ${W}Changer v${CURRENT_VERSION}${RS}" "$GR"
+    box_row "  ${RD}  |_|   |_| \_____|${RS}" "$GR"
+    box_empty "$GR"
+    box_div "$GR"
+    box_row "  ${DIM}Owner${RS} : ${OR}CODEX-M41NUL${RS}  ${DIM}Dev${RS}: ${W}M41NUL${RS}" "$GR"
+    box_row "  ${DIM}GitHub${RS}: ${GR}github.com/M41NUL${RS}" "$GR"
+    box_bot "$GR"
     echo ""
 }
 
@@ -103,9 +148,9 @@ auto_install_deps() {
     for tool in "${missing[@]}"; do
         printf "  ${OR}[*]${RS} Installing ${W}%-16s${RS} " "$tool..."
         if pkg install -y "$tool" >/dev/null 2>&1; then
-            printf "${GR}[✓] Done${RS}\n"
+            printf "${GR}[+] Done${RS}\n"
         else
-            printf "${RD}[✗] Failed${RS}\n"
+            printf "${RD}[-] Failed${RS}\n"
         fi
     done
 
@@ -152,9 +197,9 @@ auto_update() {
 run_installer() {
     clear
     echo ""
-    echo -e "${GR}  ╔════════════════════════════════════════╗${RS}"
-    echo -e "${GR}  ║${RS}     ${GR}STARTING THEME INSTALLATION${RS}         ${GR}║${RS}"
-    echo -e "${GR}  ╚════════════════════════════════════════╝${RS}"
+    box_top "$GR"
+    box_row "     ${GR}STARTING THEME INSTALLATION${RS}" "$GR" "l"
+    box_bot "$GR"
     echo ""
     sleep 0.5
 
@@ -189,21 +234,21 @@ run_installer() {
 dev_info() {
     clear
     show_banner
-    echo -e "${GR}  ╔════════════════════════════════════════╗${RS}"
-    echo -e "${GR}  ║${RS}          ${W}DEVELOPER PROFILE${RS}               ${GR}║${RS}"
-    echo -e "${GR}  ╠════════════════════════════════════════╣${RS}"
-    echo -e "${GR}  ║${RS}  ${DIM}Name    ${RS}: ${W}Md. Mainul Islam${RS}             ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}  ${DIM}Alias   ${RS}: ${OR}CODEX-M41NUL${RS}                 ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}  ${DIM}GitHub  ${RS}: ${GR}github.com/M41NUL${RS}            ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}  ${DIM}TG      ${RS}: ${GR}t.me/mdmainulislaminfo${RS}       ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}  ${DIM}Channel ${RS}: ${GR}t.me/codexm41nul${RS}             ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}  ${DIM}Group   ${RS}: ${GR}t.me/codex_m41nul${RS}            ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}  ${DIM}YouTube ${RS}: ${RD}youtube.com/@codexm41nul${RS}     ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}  ${DIM}WA      ${RS}: ${GR}+8801308850528${RS}               ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}  ${DIM}Email   ${RS}: ${OR}devmainulislam@gmail.com${RS}     ${GR}║${RS}"
-    echo -e "${GR}  ╠════════════════════════════════════════╣${RS}"
-    echo -e "${GR}  ║${RS}  ${DIM}© 2026 CODEX-M41NUL. All Rights Reserved.${RS}${GR}║${RS}"
-    echo -e "${GR}  ╚════════════════════════════════════════╝${RS}"
+    box_top "$GR"
+    box_row "          ${W}DEVELOPER PROFILE${RS}" "$GR" "l"
+    box_div "$GR"
+    box_row "  ${DIM}Name    ${RS}: ${W}Md. Mainul Islam${RS}" "$GR"
+    box_row "  ${DIM}Alias   ${RS}: ${OR}CODEX-M41NUL${RS}" "$GR"
+    box_row "  ${DIM}GitHub  ${RS}: ${GR}github.com/M41NUL${RS}" "$GR"
+    box_row "  ${DIM}TG      ${RS}: ${GR}t.me/mdmainulislaminfo${RS}" "$GR"
+    box_row "  ${DIM}Channel ${RS}: ${GR}t.me/codexm41nul${RS}" "$GR"
+    box_row "  ${DIM}Group   ${RS}: ${GR}t.me/codex_m41nul${RS}" "$GR"
+    box_row "  ${DIM}YouTube ${RS}: ${RD}youtube.com/@codexm41nul${RS}" "$GR"
+    box_row "  ${DIM}WA      ${RS}: ${GR}+8801308850528${RS}" "$GR"
+    box_row "  ${DIM}Email   ${RS}: ${OR}devmainulislam@gmail.com${RS}" "$GR"
+    box_div "$GR"
+    box_row "  ${DIM}© 2026 CODEX-M41NUL. All Rights Reserved.${RS}" "$GR"
+    box_bot "$GR"
     echo ""
     printf "${OR}  Press Enter to return...${RS}"
     read -r
@@ -215,21 +260,21 @@ dev_info() {
 about_tool() {
     clear
     show_banner
-    echo -e "${GR}  ╔════════════════════════════════════════╗${RS}"
-    echo -e "${GR}  ║${RS}          ${W}ABOUT THIS TOOL${RS}                 ${GR}║${RS}"
-    echo -e "${GR}  ╠════════════════════════════════════════╣${RS}"
-    echo -e "${GR}  ║${RS}  ${OR}▶${RS} Advanced Termux customization suite   ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}  ${OR}▶${RS} Auto-install all required packages    ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}  ${OR}▶${RS} Auto-update from GitHub on every run  ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}  ${OR}▶${RS} ZSH + Plugins (auto, highlight, fzf) ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}  ${OR}▶${RS} Custom Nerd Font integration          ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}  ${OR}▶${RS} logo-ls with icons                    ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}  ${OR}▶${RS} RXFETCH-style terminal banner         ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}  ${OR}▶${RS} One-click full system restore         ${GR}║${RS}"
-    echo -e "${GR}  ╠════════════════════════════════════════╣${RS}"
-    echo -e "${GR}  ║${RS}  ${DIM}Version${RS} : ${GR}${CURRENT_VERSION}${RS}                          ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}  ${DIM}Repo   ${RS} : ${GR}github.com/M41NUL/ttc${RS}           ${GR}║${RS}"
-    echo -e "${GR}  ╚════════════════════════════════════════╝${RS}"
+    box_top "$GR"
+    box_row "          ${W}ABOUT THIS TOOL${RS}" "$GR" "l"
+    box_div "$GR"
+    box_row "  ${OR}>${RS} Advanced Termux customization suite" "$GR"
+    box_row "  ${OR}>${RS} Auto-install all required packages" "$GR"
+    box_row "  ${OR}>${RS} Auto-update from GitHub on every run" "$GR"
+    box_row "  ${OR}>${RS} ZSH + Plugins (auto, highlight, fzf)" "$GR"
+    box_row "  ${OR}>${RS} Custom Nerd Font integration" "$GR"
+    box_row "  ${OR}>${RS} logo-ls with icons" "$GR"
+    box_row "  ${OR}>${RS} RXFETCH-style terminal banner" "$GR"
+    box_row "  ${OR}>${RS} One-click full system restore" "$GR"
+    box_div "$GR"
+    box_row "  ${DIM}Version${RS} : ${GR}${CURRENT_VERSION}${RS}" "$GR"
+    box_row "  ${DIM}Repo   ${RS} : ${GR}github.com/M41NUL/ttc${RS}" "$GR"
+    box_bot "$GR"
     echo ""
     printf "${OR}  Press Enter to return...${RS}"
     read -r
@@ -259,15 +304,15 @@ force_update() {
 # MAIN MENU
 # ──────────────────────────────────────
 show_menu() {
-    echo -e "${GR}  ╔════════════════════════════════════════╗${RS}"
-    echo -e "${GR}  ║${RS}           ${W}CONTROL PANEL${RS}                  ${GR}║${RS}"
-    echo -e "${GR}  ╠══════╦═════════════════════════════════╣${RS}"
-    echo -e "${GR}  ║${RS}  ${GR}01${RS}  ${GR}║${RS}  ${W}Start Theme Installation${RS}           ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}  ${GR}02${RS}  ${GR}║${RS}  ${W}Developer Profile${RS}                  ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}  ${GR}03${RS}  ${GR}║${RS}  ${W}About This Tool${RS}                    ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}  ${OR}04${RS}  ${GR}║${RS}  ${W}Force Update from GitHub${RS}           ${GR}║${RS}"
-    echo -e "${GR}  ║${RS}  ${RD}00${RS}  ${GR}║${RS}  ${RD}Exit Application${RS}                   ${GR}║${RS}"
-    echo -e "${GR}  ╚══════╩═════════════════════════════════╝${RS}"
+    box_top "$GR"
+    box_row "           ${W}CONTROL PANEL${RS}" "$GR" "l"
+    box_div "$GR"
+    box_row "  ${GR}01${RS}  |  ${W}Start Theme Installation${RS}" "$GR"
+    box_row "  ${GR}02${RS}  |  ${W}Developer Profile${RS}" "$GR"
+    box_row "  ${GR}03${RS}  |  ${W}About This Tool${RS}" "$GR"
+    box_row "  ${OR}04${RS}  |  ${W}Force Update from GitHub${RS}" "$GR"
+    box_row "  ${RD}00${RS}  |  ${RD}Exit Application${RS}" "$GR"
+    box_bot "$GR"
     echo ""
 }
 
@@ -283,7 +328,7 @@ main() {
     while true; do
         show_banner
         show_menu
-        printf "  ${GR}SELECT${RS} ${DIM}[01/02/03/04/00]${RS} ${GR}→${RS} "
+        printf "  ${GR}SELECT${RS} ${DIM}[01/02/03/04/00]${RS} ${GR}>>${RS} "
         read -r choice
 
         case "$choice" in
