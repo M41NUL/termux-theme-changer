@@ -67,7 +67,7 @@
 - `logo-ls` integration for a modern `ls` experience with icons.
 - Custom Nerd Font + `termux.properties` configuration.
 - Personalized RXFETCH-style terminal banner with your name.
-- Restore script (`restore.sh`) to safely revert Termux to its default state.
+- Restore script to safely revert Termux to its default state.
 
 <br>
 
@@ -79,7 +79,7 @@
 rm -rf termux-theme-changer && pkg install git -y && git clone https://github.com/M41NUL/termux-theme-changer.git && cd termux-theme-changer && bash setup.sh
 ```
 
-After setup, just type `ttc` from anywhere to launch:
+After setup, just type `ttc` from anywhere:
 
 ```bash
 ttc
@@ -89,54 +89,41 @@ ttc
 
 <br>
 
-## Usage Flow
+## Commands
 
-```
-ttc
- |
- +-- [1] Auto-install missing dependencies
- +-- [2] Auto-update from GitHub (checks commit hash)
- +-- [3] Menu
-      |
-      +-- 01 >> Start Theme Installation
-      +-- 02 >> Developer Profile
-      +-- 03 >> About This Tool
-      +-- 04 >> Force Update from GitHub
-      +-- 00 >> Exit
-```
+| Command | Description |
+|---------|-------------|
+| `ttc` | Launch TTC main menu |
+| `bash setup.sh` | Install or re-install TTC |
+| `bash ~/restore.sh` | Restore Termux to default clean state |
 
 <br>
 
-## How Auto-Update Works
+## Menu Options
 
-Every time `ttc` launches, it runs two checks:
-
-1. **On launch** — compares local commit hash with GitHub's latest. If different, pulls automatically.
-2. **Background fetch** (via `.zshrc` hook) — silently fetches in the background so the next launch is faster.
-
-Use **Option 04 → Force Update** to do a hard reset to the latest GitHub version at any time.
-
-<br>
-
-## How Auto-Install Works
-
-On every `ttc` launch, the tool checks for these required packages:
-
-```
-git  curl  zsh  figlet  fzf  neofetch
-```
-
-Any missing package is installed automatically via `pkg install` — no user input needed.
+| Option | Action |
+|--------|--------|
+| `01` | Start full theme installation |
+| `02` | View developer profile & contacts |
+| `03` | About this tool & version info |
+| `04` | Force update from GitHub (hard reset) |
+| `00` | Exit TTC |
 
 <br>
 
-## Restore
+## ZSH Aliases (added automatically)
 
-To revert Termux to its original clean state:
-
-```bash
-bash ~/restore.sh
-```
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `c` | `clear` | Clear terminal |
+| `q` | `exit` | Exit session |
+| `sd` | `cd /sdcard` | Go to internal storage |
+| `dl` | `cd /sdcard/Download` | Go to Downloads folder |
+| `neo` | `neofetch` | Show system info |
+| `ls` | `logo-ls` | List with icons |
+| `ll` | `logo-ls -l` | Detailed list with icons |
+| `pacupg` | `pkg upgrade` | Upgrade all packages |
+| `pacupd` | `pkg update` | Update package lists |
 
 <br>
 
@@ -149,6 +136,56 @@ bash ~/restore.sh
 | `zsh-autocomplete` | Live completion menu |
 | `zsh-fzf-history-search` | Fuzzy history search with fzf |
 | `bgnotify` | Background task notifications |
+
+<br>
+
+## Auto-Update
+
+Every time `ttc` launches it runs two checks:
+
+| Step | What happens |
+|------|-------------|
+| On launch | Compares local commit hash with GitHub. Pulls if different. |
+| Background (`.zshrc` hook) | Silently fetches in background — next launch is faster. |
+
+Use **Option `04` → Force Update** to hard-reset to latest GitHub version anytime.
+
+<br>
+
+## Auto-Install
+
+On every `ttc` launch, these packages are checked and installed if missing:
+
+```
+git   curl   zsh   figlet   fzf   neofetch
+```
+
+No user input needed — all done automatically.
+
+<br>
+
+## File Structure
+
+```
+termux-theme-changer/
+├── ttc.sh                    # Main controller & menu
+├── setup.sh                  # One-time installer
+├── shared/
+│   └── prog.sh               # Shared colors, progress bar, helpers
+├── installer/
+│   ├── env/i1-env.sh         # figlet + TTC ASCII display
+│   ├── core/i2-core.sh       # Core packages (bash, curl, git, zsh)
+│   ├── extra/i3-extra.sh     # logo-ls build & aliases
+│   ├── plugins/i4-plugins.sh # ZSH plugins clone
+│   ├── theme/i5-theme.sh     # Colors, font, termux.properties, banner
+│   ├── shell/i6-shell.sh     # .zshrc write & zsh default shell
+│   ├── restore/i7-restore.sh # Create ~/restore.sh
+│   └── final/i8-final.sh     # Done message
+├── Font/
+│   └── font.ttf              # Custom Nerd Font
+└── themes/
+    └── banner.sh             # RXFETCH-style terminal banner (generated)
+```
 
 <br>
 
@@ -170,10 +207,10 @@ bash ~/restore.sh
 
 ## Special Thanks
 
-- [mayTermux](https://github.com/mayTermux) – inspiration for look and UI.
-- [Termux](https://termux.dev/) – Android terminal platform.
-- [Bash](https://www.gnu.org/software/bash/) – shell scripting.
-- [Zsh](https://www.zsh.org/) – modern shell for prompt customization.
+- [mayTermux](https://github.com/mayTermux) — inspiration for look and UI.
+- [Termux](https://termux.dev/) — Android terminal platform.
+- [Bash](https://www.gnu.org/software/bash/) — shell scripting.
+- [Zsh](https://www.zsh.org/) — modern shell for prompt customization.
 - All open-source communities for their support.
 
 <br>

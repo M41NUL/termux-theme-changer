@@ -37,7 +37,9 @@ progress_bar() {
     local task="$1"
     local duration="${2:-2}"
     local width=20
-    printf "\n\n"
+    local task_padded
+    task_padded=$(printf "%-26s" "${task:0:26}")
+    printf "\n"
     for i in $(seq 0 5 100); do
         local filled=$(( i * width / 100 ))
         local empty=$(( width - filled ))
@@ -46,16 +48,11 @@ progress_bar() {
         [ "$empty"  -gt 0 ] && spa=$(printf '%0.s░' $(seq 1 $empty))
         local color="$OR"
         [ "$i" -ge 100 ] && color="$GR"
-        printf "\033[2A"
-        printf "  ${DIM}%-24s${RS}  ${color}╭──────────────────────╮${RS}\n" "${task:0:24}"
-        printf "  ${W}Progress: %3d%%${RS}     ${color}│${RS} %s%s%s%s ${color}│${RS}\n" \
-            "$i" "${color}" "${bar}" "${DIM}${spa}${RS}" ""
+        printf "\r  %s ${color}[%s%s${DIM}%s${RS}${color}]${RS} %3d%%" \
+            "$task_padded" "$color" "$bar" "$spa" "$i"
         sleep "$(awk "BEGIN{printf \"%.3f\", $duration/20}")"
     done
-    printf "\033[2A"
-    printf "  ${DIM}%-24s${RS}  ${GR}╭──────────────────────╮${RS}\n" "${task:0:24}"
-    printf "  ${W}Progress: ${GR}100%%${RS}     ${GR}│${RS} ${GR}$(printf '%0.s█' $(seq 1 20))${RS} ${GR}│${RS}  ${BG_GR} COMPLETE ${RS}\n"
-    printf "\n\n"
+    printf "\r  %s ${GR}[$(printf '%0.s█' $(seq 1 20))]${RS} ${BG_GR} 100%% COMPLETE ${RS}\n\n"
 }
 
 # ──────────────────────────────────────
@@ -243,12 +240,33 @@ force_update() {
 # MAIN MENU
 # ──────────────────────────────────────
 show_menu() {
-    printf "  ${BG_CY} CONTROL PANEL ${RS}\n\n"
-    printf "  ${BG_GR} 01 ${RS}  Start Theme Installation\n"
-    printf "  ${BG_GR} 02 ${RS}  Developer Profile\n"
-    printf "  ${BG_GR} 03 ${RS}  About This Tool\n"
-    printf "  ${BG_OR} 04 ${RS}  Force Update from GitHub\n"
-    printf "  ${BG_RD} 00 ${RS}  Exit Application\n"
+    local w inner line sep
+    w=$(tput cols 2>/dev/null || echo 44)
+    [ "$w" -gt 52 ] && w=52
+    [ "$w" -lt 28 ] && w=28
+    inner=$(( w - 2 ))
+    line=$(printf '%*s' "$inner" '' | tr ' ' '-')
+    sep=$(printf '%*s' "$inner" '' | tr ' ' '=')
+
+    _mrow() {
+        local txt="$1" color="${2:-$GR}"
+        local plain
+        plain=$(printf '%s' "$txt" | sed 's/\x1b\[[0-9;]*m//g')
+        local plen=${#plain}
+        local pad=$(( inner - 2 - plen ))
+        [ "$pad" -lt 0 ] && pad=0
+        printf "${color}|${RS} %s%*s ${color}|${RS}\n" "$txt" "$pad" ''
+    }
+
+    printf "${GR}+%s+${RS}\n" "$line"
+    _mrow "  ${W}CONTROL PANEL${RS}"
+    printf "${GR}+%s+${RS}\n" "$sep"
+    _mrow "  ${BG_GR} 01 ${RS}  Start Theme Installation"
+    _mrow "  ${GR}|${RS}  ${BG_GR} 02 ${RS}  Developer Profile"
+    _mrow "  ${GR}|${RS}  ${BG_GR} 03 ${RS}  About This Tool"
+    _mrow "  ${GR}|${RS}  ${BG_OR} 04 ${RS}  Force Update from GitHub"
+    _mrow "  ${GR}|${RS}  ${BG_RD} 00 ${RS}  Exit Application"
+    printf "${GR}+%s+${RS}\n" "$line"
     printf "\n"
 }
 
