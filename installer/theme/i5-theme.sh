@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 #=======================================
-# MAINUL-X THEME INSTALLER - I5-THEME.SH FILE
-# Version: 1.0 | (c) 2026 MAINUL - X
-# Developer: MAINUL ISLAM 
-# GitHub: M41NUL
-# Contact: +8801308850528 
-#Gmail: githubmainul@gmail.com
+# CODEX-M41NUL - INSTALLER - I5-THEME.SH
+# Version: 2.0 | © 2026 CODEX-M41NUL. All Rights Reserved.
+# Developer : Md. Mainul Islam
+# GitHub    : https://github.com/M41NUL
+# Telegram  : t.me/mdmainulislaminfo
+# Channel   : t.me/codexm41nul
 #=======================================
 
 BASE="$HOME/termux-theme-changer"

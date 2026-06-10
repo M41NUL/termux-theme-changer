@@ -1,26 +1,92 @@
 #!/usr/bin/env bash
 #=======================================
-# MAINUL-X THEME INSTALLER - INSTALL FILE
-# Version: 1.0 | (c) 2026 MAINUL - X
-# Developer: MAINUL ISLAM 
-# GitHub: M41NUL
-# Contact: +8801308850528 
-#Gmail: githubmainul@gmail.com
+# CODEX-M41NUL - TTC SETUP INSTALLER
+# Version: 2.0 | © 2026 CODEX-M41NUL. All Rights Reserved.
+# Developer : Md. Mainul Islam
+# GitHub    : https://github.com/M41NUL
+# Telegram  : t.me/mdmainulislaminfo
+# Channel   : t.me/codexm41nul
 #=======================================
 
 set -euo pipefail
 
-export BASE="$HOME/termux-theme-changer"
-INSTALLER_DIR="$BASE/installer"
-SHARED_DIR="$BASE/shared"
+REPO_URL="https://github.com/M41NUL/termux-theme-changer.git"
+BASE="$HOME/termux-theme-changer"
+BIN_LINK="$PREFIX/bin/ttc"
 
-mkdir -p "$INSTALLER_DIR" "$SHARED_DIR"
+R='\033[1;31m'; G='\033[1;32m'; Y='\033[1;33m'
+C='\033[1;36m'; W='\033[1;37m'; RESET='\033[0m'
 
-bash "$INSTALLER_DIR/env/i1-env.sh"
-bash "$INSTALLER_DIR/core/i2-core.sh"
-bash "$INSTALLER_DIR/extra/i3-extra.sh"
-bash "$INSTALLER_DIR/plugins/i4-plugins.sh"
-bash "$INSTALLER_DIR/theme/i5-theme.sh"
-bash "$INSTALLER_DIR/shell/i6-shell.sh"
-bash "$INSTALLER_DIR/restore/i7-restore.sh"
-bash "$INSTALLER_DIR/final/i8-final.sh"
+clear
+echo -e ""
+echo -e "  ${C}╔══════════════════════════════════════════╗${RESET}"
+echo -e "  ${C}║${RESET}      ${W}MAINUL-X TTC SETUP INSTALLER${RESET}        ${C}║${RESET}"
+echo -e "  ${C}╚══════════════════════════════════════════╝${RESET}"
+echo -e ""
+
+info()    { printf "  ${C}[*]${RESET} %s\n" "$1"; }
+success() { printf "  ${G}[✓]${RESET} %s\n" "$1"; }
+warn()    { printf "  ${Y}[!]${RESET} %s\n" "$1"; }
+error()   { printf "  ${R}[✗]${RESET} %s\n" "$1"; exit 1; }
+
+# ── 1. Install git if missing ──
+if ! command -v git >/dev/null 2>&1; then
+    info "git not found, installing..."
+    pkg install -y git >/dev/null 2>&1 && success "git installed." || error "Failed to install git."
+fi
+
+# ── 2. Clone or update repo ──
+if [ -d "$BASE/.git" ]; then
+    info "Existing repo found. Updating..."
+    git -C "$BASE" pull --quiet origin main 2>/dev/null || \
+    git -C "$BASE" pull --quiet origin master 2>/dev/null || \
+    warn "Could not pull latest — using existing files."
+    success "Repo up to date."
+else
+    info "Cloning from GitHub..."
+    rm -rf "$BASE"
+    git clone --quiet "$REPO_URL" "$BASE" 2>/dev/null || error "Clone failed. Check internet."
+    success "Repo cloned successfully."
+fi
+
+# ── 3. Set permissions ──
+info "Setting permissions..."
+chmod +x "$BASE/ttc.sh"
+chmod +x "$BASE/setup.sh"
+find "$BASE/installer" -name "*.sh" -exec chmod +x {} \;
+find "$BASE/shared"    -name "*.sh" -exec chmod +x {} \;
+success "Permissions set."
+
+# ── 4. Create 'ttc' command ──
+info "Creating 'ttc' global command..."
+cat > "$BIN_LINK" <<EOF
+#!/usr/bin/env bash
+exec bash "\$HOME/termux-theme-changer/ttc.sh" "\$@"
+EOF
+chmod +x "$BIN_LINK"
+success "'ttc' command created — you can now just type: ttc"
+
+# ── 5. Add zshrc background update hook ──
+ZSHRC="$HOME/.zshrc"
+HOOK='# TTC auto-update hook
+[ -d "$HOME/termux-theme-changer/.git" ] && \
+    git -C "$HOME/termux-theme-changer" fetch --quiet origin 2>/dev/null &'
+
+if [ -f "$ZSHRC" ]; then
+    grep -q "TTC auto-update hook" "$ZSHRC" || {
+        echo "" >> "$ZSHRC"
+        echo "$HOOK" >> "$ZSHRC"
+        success "Auto-update hook added to .zshrc"
+    }
+fi
+
+# ── 6. Done ──
+echo ""
+echo -e "  ${C}╔══════════════════════════════════════════╗${RESET}"
+echo -e "  ${C}║${RESET}       ${G}SETUP COMPLETE! READY TO USE.${RESET}       ${C}║${RESET}"
+echo -e "  ${C}╠══════════════════════════════════════════╣${RESET}"
+echo -e "  ${C}║${RESET}  ${Y}▶ Type:${RESET}  ${W}ttc${RESET}  to launch the tool          ${C}║${RESET}"
+echo -e "  ${C}║${RESET}  ${Y}▶ Auto-update runs on every launch${RESET}       ${C}║${RESET}"
+echo -e "  ${C}║${RESET}  ${Y}▶ GitHub:${RESET} ${C}github.com/M41NUL${RESET}              ${C}║${RESET}"
+echo -e "  ${C}╚══════════════════════════════════════════╝${RESET}"
+echo ""
