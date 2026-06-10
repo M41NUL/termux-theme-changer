@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #=======================================
 # CODEX-M41NUL - SHARED / PROG.SH
-# Version: 2.0 | © 2026 CODEX-M41NUL. All Rights Reserved.
+# Version: 2.1 | © 2026 CODEX-M41NUL. All Rights Reserved.
 #=======================================
 
 GR=$'\033[1;32m'
@@ -14,8 +14,7 @@ DIM=$'\033[2m'
 BLD=$'\033[1m'
 RS=$'\033[0m'
 
-# ── Reverse (text on colored bg) ──
-BG_GR=$'\033[42;30m'   # green bg black text
+BG_GR=$'\033[42;30m'
 BG_OR=$'\033[48;5;208;30m'
 BG_RD=$'\033[41;97m'
 BG_CY=$'\033[46;30m'
@@ -27,27 +26,29 @@ success() { printf "  ${GR}[+]${RS} %s\n" "$1"; }
 error()   { printf "  ${RD}[-]${RS} %s\n" "$1"; }
 step()    { printf "\n  ${BG_GR} >> ${RS} ${BLD}%s${RS}\n" "$1"; }
 
-# ──────────────────────────────────────
-# PROGRESS BAR  ╭─╮ style with █
-# ──────────────────────────────────────
 progress_bar() {
     local task="$1"
     local duration="${2:-2}"
-    local width=20
-    local task_padded
-    task_padded=$(printf "%-26s" "${task:0:26}")
+    local width=25
+    local char="█"
+    local empty_char="░"
+    local term_width=$(tput cols)
+    local task_display="${task:0:30}"
+
     printf "\n"
-    for i in $(seq 0 5 100); do
+    for i in $(seq 0 2 100); do
         local filled=$(( i * width / 100 ))
         local empty=$(( width - filled ))
-        local bar="" spa=""
-        [ "$filled" -gt 0 ] && bar=$(printf '%0.s█' $(seq 1 $filled))
-        [ "$empty"  -gt 0 ] && spa=$(printf '%0.s░' $(seq 1 $empty))
+        local bar=$(printf "%0.s$char" $(seq 1 $filled 2>/dev/null))
+        local space=$(printf "%0.s$empty_char" $(seq 1 $empty 2>/dev/null))
         local color="$OR"
-        [ "$i" -ge 100 ] && color="$GR"
-        printf "\r  %s ${color}[%s%s${DIM}%s${RS}${color}]${RS} %3d%%" \
-            "$task_padded" "$color" "$bar" "$spa" "$i"
-        sleep "$(awk "BEGIN{printf \"%.3f\", $duration/20}")"
+        [ "$i" -eq 100 ] && color="$GR"
+        local prog_text="${color}[$bar$RS$DIM$space$RS${color}] $i%${RS}"
+        local pad=$((term_width - ${#task_display} - width - 15))
+        ((pad < 1)) && pad=1
+        local padding=$(printf "%*s" "$pad" "")
+        printf "\r  ${CY}[*]${RS} %s%s%s" "$task_display" "$padding" "$prog_text"
+        sleep "$(awk "BEGIN {print $duration/50}")"
     done
-    printf "\r  %s ${GR}[$(printf '%0.s█' $(seq 1 20))]${RS} ${BG_GR} 100%% COMPLETE ${RS}\n\n"
+    printf "\r  ${CY}[*]${RS} %s%s${BG_GR} 100%% COMPLETE ${RS}\n\n" "$task_display" "$padding"
 }
