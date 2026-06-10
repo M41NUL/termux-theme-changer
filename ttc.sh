@@ -17,63 +17,65 @@ INSTALLER_DIR="$BASE/installer"
 REPO_URL="https://github.com/M41NUL/termux-theme-changer.git"
 CURRENT_VERSION="2.0.0"
 
-# ── Colors: Green / Red / Orange theme ──
-GR='\033[1;32m'   # Green
-RD='\033[1;31m'   # Red
-OR='\033[38;5;208m' # Orange
-W='\033[1;37m'    # White
-DIM='\033[2m'
-RESET='\033[0m'
+# ── Colors ──
+GR=$'\033[1;32m'
+RD=$'\033[1;31m'
+OR=$'\033[38;5;208m'
+W=$'\033[1;37m'
+DIM=$'\033[2m'
+RS=$'\033[0m'
 
-info()    { printf "${OR}[*]${RESET} %s\n" "$1"; }
-success() { printf "${GR}[✓]${RESET} %s\n" "$1"; }
-warn()    { printf "${OR}[!]${RESET} %s\n" "$1"; }
-error()   { printf "${RD}[✗]${RESET} %s\n" "$1"; }
-step()    { printf "\n${GR}[→]${RESET} ${W}%s${RESET}\n" "$1"; }
-
-# ──────────────────────────────────────
-# BANNER
-# ──────────────────────────────────────
-show_banner() {
-    clear
-    echo -e ""
-    echo -e "  ${GR}╔══════════════════════════════════════════╗${RESET}"
-    echo -e "  ${GR}║${RESET}                                          ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET}   ${RD} _____ _____ _____${RESET}                    ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET}   ${OR}|_   _|_   _/ ____|${RESET}                   ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET}   ${GR}  | |   | || |     ${RESET}  ${W}Termux Theme${RESET}    ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET}   ${OR}  | |   | || |___  ${RESET}  ${W}Changer v${CURRENT_VERSION}${RESET}  ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET}   ${RD}  |_|   |_| \_____|${RESET}                   ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET}                                          ${GR}║${RESET}"
-    echo -e "  ${GR}╠══════════════════════════════════════════╣${RESET}"
-    echo -e "  ${GR}║${RESET}  ${DIM}Owner${RESET}  : ${OR}CODEX-M41NUL${RESET}  ${DIM}│${RESET}  ${DIM}Dev${RESET}: ${W}M41NUL${RESET}   ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET}  ${DIM}GitHub${RESET} : ${GR}github.com/M41NUL${RESET}              ${GR}║${RESET}"
-    echo -e "  ${GR}╚══════════════════════════════════════════╝${RESET}"
-    echo -e ""
-}
+info()    { printf "${OR}[*]${RS} %s\n" "$1"; }
+success() { printf "${GR}[✓]${RS} %s\n" "$1"; }
+warn()    { printf "${OR}[!]${RS} %s\n" "$1"; }
+error()   { printf "${RD}[✗]${RS} %s\n" "$1"; }
+step()    { printf "\n${GR}[→]${RS} ${W}%s${RS}\n" "$1"; }
 
 # ──────────────────────────────────────
-# PROGRESS BAR
+# PROGRESS BAR (Termux safe - no \r issue)
 # ──────────────────────────────────────
 progress_bar() {
     local task="$1"
     local duration="${2:-2}"
     local width=20
     local task_padded
-    task_padded=$(printf "%-28s" "${task:0:28}")
-    for i in $(seq 0 100); do
-        local filled=$((i * width / 100))
+    task_padded=$(printf "%-26s" "${task:0:26}")
+
+    for i in $(seq 0 4 100); do
+        local filled=$(( i * width / 100 ))
         local bar
-        bar=$(printf "%${filled}s" | tr ' ' '█')
+        bar=$(printf "%${filled}s" "" | tr ' ' '#')
         local spa
-        spa=$(printf "%$((width - filled))s" | tr ' ' '░')
+        spa=$(printf "%$(( width - filled ))s" "" | tr ' ' '-')
         local color="$OR"
-        (( i == 100 )) && color="$GR"
-        printf "\r  ${DIM}%s${RESET} ${color}[%s%s]${RESET} ${W}%3d%%${RESET}" \
-            "$task_padded" "$bar" "$spa" "$i"
-        sleep "$(awk "BEGIN{print $duration/100}")"
+        [ "$i" -ge 100 ] && color="$GR"
+        printf "\r  %s %s[%s%s]%s %3d%%" \
+            "$task_padded" "$color" "$bar" "$spa" "$RS" "$i"
+        sleep "$(awk "BEGIN{printf \"%.3f\", $duration/25}")"
     done
-    echo
+    printf "\r  %s ${GR}[%s]${RS} 100%%\n" \
+        "$task_padded" "$(printf '%0.s#' $(seq 1 $width))"
+}
+
+# ──────────────────────────────────────
+# BANNER  (fixed width = 44 inner chars)
+# ──────────────────────────────────────
+show_banner() {
+    clear
+    echo ""
+    echo -e "${GR}  ╔════════════════════════════════════════╗${RS}"
+    echo -e "${GR}  ║${RS}                                        ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}  ${RD} _____ _____ _____${RS}                   ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}  ${OR}|_   _|_   _/ ____|${RS}                  ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}  ${GR}  | |   | || |     ${RS}  ${W}Termux Theme${RS}   ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}  ${OR}  | |   | || |___  ${RS}  ${W}Changer v${CURRENT_VERSION}${RS} ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}  ${RD}  |_|   |_| \_____|${RS}                  ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}                                        ${GR}║${RS}"
+    echo -e "${GR}  ╠════════════════════════════════════════╣${RS}"
+    echo -e "${GR}  ║${RS}  ${DIM}Owner${RS} : ${OR}CODEX-M41NUL${RS}  ${DIM}Dev${RS}: ${W}M41NUL${RS}        ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}  ${DIM}GitHub${RS}: ${GR}github.com/M41NUL${RS}               ${GR}║${RS}"
+    echo -e "${GR}  ╚════════════════════════════════════════╝${RS}"
+    echo ""
 }
 
 # ──────────────────────────────────────
@@ -99,11 +101,11 @@ auto_install_deps() {
     apt update -qq >/dev/null 2>&1 || true
 
     for tool in "${missing[@]}"; do
-        printf "  ${OR}[*]${RESET} Installing ${W}%-18s${RESET}" "$tool ..."
+        printf "  ${OR}[*]${RS} Installing ${W}%-16s${RS} " "$tool..."
         if pkg install -y "$tool" >/dev/null 2>&1; then
-            echo -e " ${GR}[✓] Done${RESET}"
+            printf "${GR}[✓] Done${RS}\n"
         else
-            echo -e " ${RD}[✗] Failed${RESET}"
+            printf "${RD}[✗] Failed${RS}\n"
         fi
     done
 
@@ -129,19 +131,19 @@ auto_update() {
     if [ "$REMOTE" = "none" ]; then
         warn "No internet — skipping update."
     elif [ "$LOCAL" = "$REMOTE" ]; then
-        success "Already up to date.  ${DIM}(${LOCAL:0:7})${RESET}"
+        success "Already up to date. (${LOCAL:0:7})"
     else
         info "New update found! Pulling from GitHub..."
         progress_bar "Downloading update" 2
         if git -C "$BASE" pull --quiet origin main 2>/dev/null || \
            git -C "$BASE" pull --quiet origin master 2>/dev/null; then
-            success "Updated!  ${DIM}(${REMOTE:0:7})${RESET}"
+            success "Updated! (${REMOTE:0:7})"
         else
             warn "Pull failed — check connection."
         fi
     fi
 
-    sleep 0.5
+    sleep 0.3
 }
 
 # ──────────────────────────────────────
@@ -149,11 +151,11 @@ auto_update() {
 # ──────────────────────────────────────
 run_installer() {
     clear
-    echo -e ""
-    echo -e "  ${GR}╔══════════════════════════════════════════╗${RESET}"
-    echo -e "  ${GR}║${RESET}       ${GR}STARTING THEME INSTALLATION${RESET}        ${GR}║${RESET}"
-    echo -e "  ${GR}╚══════════════════════════════════════════╝${RESET}"
-    echo -e ""
+    echo ""
+    echo -e "${GR}  ╔════════════════════════════════════════╗${RS}"
+    echo -e "${GR}  ║${RS}     ${GR}STARTING THEME INSTALLATION${RS}         ${GR}║${RS}"
+    echo -e "${GR}  ╚════════════════════════════════════════╝${RS}"
+    echo ""
     sleep 0.5
 
     local SCRIPTS=(
@@ -177,7 +179,7 @@ run_installer() {
     done
 
     echo ""
-    printf "${OR}  Press Enter to return to menu...${RESET}"
+    printf "${OR}  Press Enter to return to menu...${RS}"
     read -r
 }
 
@@ -187,23 +189,23 @@ run_installer() {
 dev_info() {
     clear
     show_banner
-    echo -e "  ${GR}╔══════════════════════════════════════════╗${RESET}"
-    echo -e "  ${GR}║${RESET}           ${W}DEVELOPER PROFILE${RESET}               ${GR}║${RESET}"
-    echo -e "  ${GR}╠══════════════════════════════════════════╣${RESET}"
-    echo -e "  ${GR}║${RESET}  ${DIM}Name     ${RESET}: ${W}Md. Mainul Islam${RESET}            ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET}  ${DIM}Alias    ${RESET}: ${OR}CODEX-M41NUL${RESET}                ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET}  ${DIM}GitHub   ${RESET}: ${GR}github.com/M41NUL${RESET}           ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET}  ${DIM}Telegram ${RESET}: ${GR}t.me/mdmainulislaminfo${RESET}      ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET}  ${DIM}Channel  ${RESET}: ${GR}t.me/codexm41nul${RESET}            ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET}  ${DIM}Group    ${RESET}: ${GR}t.me/codex_m41nul${RESET}           ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET}  ${DIM}YouTube  ${RESET}: ${RD}youtube.com/@codexm41nul${RESET}    ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET}  ${DIM}WhatsApp ${RESET}: ${GR}+8801308850528${RESET}              ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET}  ${DIM}Email    ${RESET}: ${OR}devmainulislam@gmail.com${RESET}    ${GR}║${RESET}"
-    echo -e "  ${GR}╠══════════════════════════════════════════╣${RESET}"
-    echo -e "  ${GR}║${RESET}  ${DIM}© 2026 CODEX-M41NUL. All Rights Reserved.${RESET} ${GR}║${RESET}"
-    echo -e "  ${GR}╚══════════════════════════════════════════╝${RESET}"
+    echo -e "${GR}  ╔════════════════════════════════════════╗${RS}"
+    echo -e "${GR}  ║${RS}          ${W}DEVELOPER PROFILE${RS}               ${GR}║${RS}"
+    echo -e "${GR}  ╠════════════════════════════════════════╣${RS}"
+    echo -e "${GR}  ║${RS}  ${DIM}Name    ${RS}: ${W}Md. Mainul Islam${RS}             ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}  ${DIM}Alias   ${RS}: ${OR}CODEX-M41NUL${RS}                 ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}  ${DIM}GitHub  ${RS}: ${GR}github.com/M41NUL${RS}            ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}  ${DIM}TG      ${RS}: ${GR}t.me/mdmainulislaminfo${RS}       ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}  ${DIM}Channel ${RS}: ${GR}t.me/codexm41nul${RS}             ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}  ${DIM}Group   ${RS}: ${GR}t.me/codex_m41nul${RS}            ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}  ${DIM}YouTube ${RS}: ${RD}youtube.com/@codexm41nul${RS}     ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}  ${DIM}WA      ${RS}: ${GR}+8801308850528${RS}               ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}  ${DIM}Email   ${RS}: ${OR}devmainulislam@gmail.com${RS}     ${GR}║${RS}"
+    echo -e "${GR}  ╠════════════════════════════════════════╣${RS}"
+    echo -e "${GR}  ║${RS}  ${DIM}© 2026 CODEX-M41NUL. All Rights Reserved.${RS}${GR}║${RS}"
+    echo -e "${GR}  ╚════════════════════════════════════════╝${RS}"
     echo ""
-    printf "${OR}  Press Enter to return...${RESET}"
+    printf "${OR}  Press Enter to return...${RS}"
     read -r
 }
 
@@ -213,23 +215,23 @@ dev_info() {
 about_tool() {
     clear
     show_banner
-    echo -e "  ${GR}╔══════════════════════════════════════════╗${RESET}"
-    echo -e "  ${GR}║${RESET}           ${W}ABOUT THIS TOOL${RESET}                 ${GR}║${RESET}"
-    echo -e "  ${GR}╠══════════════════════════════════════════╣${RESET}"
-    echo -e "  ${GR}║${RESET}  ${OR}▶${RESET} Advanced Termux customization suite    ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET}  ${OR}▶${RESET} Auto-install all required packages     ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET}  ${OR}▶${RESET} Auto-update from GitHub on every run   ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET}  ${OR}▶${RESET} ZSH + Plugins (auto, highlight, fzf)  ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET}  ${OR}▶${RESET} Custom Nerd Font integration           ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET}  ${OR}▶${RESET} logo-ls with icons                     ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET}  ${OR}▶${RESET} RXFETCH-style terminal banner          ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET}  ${OR}▶${RESET} One-click full system restore          ${GR}║${RESET}"
-    echo -e "  ${GR}╠══════════════════════════════════════════╣${RESET}"
-    echo -e "  ${GR}║${RESET}  ${DIM}Version ${RESET}: ${GR}${CURRENT_VERSION}${RESET}                        ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET}  ${DIM}Repo    ${RESET}: ${GR}github.com/M41NUL/termux-theme-changer${RESET} ${GR}║${RESET}"
-    echo -e "  ${GR}╚══════════════════════════════════════════╝${RESET}"
+    echo -e "${GR}  ╔════════════════════════════════════════╗${RS}"
+    echo -e "${GR}  ║${RS}          ${W}ABOUT THIS TOOL${RS}                 ${GR}║${RS}"
+    echo -e "${GR}  ╠════════════════════════════════════════╣${RS}"
+    echo -e "${GR}  ║${RS}  ${OR}▶${RS} Advanced Termux customization suite   ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}  ${OR}▶${RS} Auto-install all required packages    ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}  ${OR}▶${RS} Auto-update from GitHub on every run  ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}  ${OR}▶${RS} ZSH + Plugins (auto, highlight, fzf) ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}  ${OR}▶${RS} Custom Nerd Font integration          ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}  ${OR}▶${RS} logo-ls with icons                    ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}  ${OR}▶${RS} RXFETCH-style terminal banner         ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}  ${OR}▶${RS} One-click full system restore         ${GR}║${RS}"
+    echo -e "${GR}  ╠════════════════════════════════════════╣${RS}"
+    echo -e "${GR}  ║${RS}  ${DIM}Version${RS} : ${GR}${CURRENT_VERSION}${RS}                          ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}  ${DIM}Repo   ${RS} : ${GR}github.com/M41NUL/ttc${RS}           ${GR}║${RS}"
+    echo -e "${GR}  ╚════════════════════════════════════════╝${RS}"
     echo ""
-    printf "${OR}  Press Enter to return...${RESET}"
+    printf "${OR}  Press Enter to return...${RS}"
     read -r
 }
 
@@ -249,7 +251,7 @@ force_update() {
         warn "Force update failed — check connection."
     fi
     echo ""
-    printf "${OR}  Press Enter to return...${RESET}"
+    printf "${OR}  Press Enter to return...${RS}"
     read -r
 }
 
@@ -257,15 +259,15 @@ force_update() {
 # MAIN MENU
 # ──────────────────────────────────────
 show_menu() {
-    echo -e "  ${GR}╔══════════════════════════════════════════╗${RESET}"
-    echo -e "  ${GR}║${RESET}             ${W}CONTROL PANEL${RESET}                 ${GR}║${RESET}"
-    echo -e "  ${GR}╠════╦═════════════════════════════════════╣${RESET}"
-    echo -e "  ${GR}║${RESET} ${GR}01${RESET} ${GR}║${RESET}  ${W}Start Theme Installation${RESET}            ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET} ${GR}02${RESET} ${GR}║${RESET}  ${W}Developer Profile${RESET}                   ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET} ${GR}03${RESET} ${GR}║${RESET}  ${W}About This Tool${RESET}                     ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET} ${OR}04${RESET} ${GR}║${RESET}  ${W}Force Update from GitHub${RESET}            ${GR}║${RESET}"
-    echo -e "  ${GR}║${RESET} ${RD}00${RESET} ${GR}║${RESET}  ${RD}Exit Application${RESET}                    ${GR}║${RESET}"
-    echo -e "  ${GR}╚════╩═════════════════════════════════════╝${RESET}"
+    echo -e "${GR}  ╔════════════════════════════════════════╗${RS}"
+    echo -e "${GR}  ║${RS}           ${W}CONTROL PANEL${RS}                  ${GR}║${RS}"
+    echo -e "${GR}  ╠══════╦═════════════════════════════════╣${RS}"
+    echo -e "${GR}  ║${RS}  ${GR}01${RS}  ${GR}║${RS}  ${W}Start Theme Installation${RS}           ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}  ${GR}02${RS}  ${GR}║${RS}  ${W}Developer Profile${RS}                  ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}  ${GR}03${RS}  ${GR}║${RS}  ${W}About This Tool${RS}                    ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}  ${OR}04${RS}  ${GR}║${RS}  ${W}Force Update from GitHub${RS}           ${GR}║${RS}"
+    echo -e "${GR}  ║${RS}  ${RD}00${RS}  ${GR}║${RS}  ${RD}Exit Application${RS}                   ${GR}║${RS}"
+    echo -e "${GR}  ╚══════╩═════════════════════════════════╝${RS}"
     echo ""
 }
 
@@ -273,22 +275,15 @@ show_menu() {
 # ENTRYPOINT
 # ──────────────────────────────────────
 main() {
-    # Load shared functions if available
     [ -f "$SHARED" ] && source "$SHARED" 2>/dev/null || true
 
-    # STEP 1: Auto-install missing tools
     auto_install_deps
-
-    # STEP 2: Auto-update check
     auto_update
 
-    sleep 0.3
-
-    # STEP 3: Main menu loop
     while true; do
         show_banner
         show_menu
-        printf "  ${GR}SELECT${RESET} ${DIM}[01/02/03/04/00]${RESET} ${GR}→${RESET} "
+        printf "  ${GR}SELECT${RS} ${DIM}[01/02/03/04/00]${RS} ${GR}→${RS} "
         read -r choice
 
         case "$choice" in
@@ -298,12 +293,12 @@ main() {
             4|04) force_update ;;
             0|00)
                 echo ""
-                echo -e "  ${RD}Shutting down. Goodbye.${RESET}"
+                echo -e "  ${RD}Shutting down. Goodbye.${RS}"
                 echo ""
                 exit 0
                 ;;
             *)
-                echo -e "\n  ${RD}[!] Invalid option. Try again.${RESET}\n"
+                echo -e "\n  ${RD}[!] Invalid option. Try again.${RS}\n"
                 sleep 0.8
                 ;;
         esac

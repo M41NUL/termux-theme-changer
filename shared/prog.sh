@@ -8,45 +8,38 @@
 # Channel   : t.me/codexm41nul
 #=======================================
 
-R='\033[1;31m'
-G='\033[1;32m'
-Y='\033[1;33m'
-B='\033[1;34m'
-M='\033[1;35m'
-C='\033[1;36m'
-W='\033[1;37m'
-DIM='\033[2m'
-RESET='\033[0m'
+GR=$'\033[1;32m'
+RD=$'\033[1;31m'
+OR=$'\033[38;5;208m'
+W=$'\033[1;37m'
+DIM=$'\033[2m'
+RS=$'\033[0m'
 
-info()    { printf "${C}[*]${RESET} %s\n" "$1"; }
-warn()    { printf "${Y}[!]${RESET} %s\n" "$1"; }
-success() { printf "${G}[✓]${RESET} %s\n" "$1"; }
-error()   { printf "${R}[✗]${RESET} %s\n" "$1"; }
-step()    { printf "\n${M}[→]${RESET} ${W}%s${RESET}\n" "$1"; }
+info()    { printf "${OR}[*]${RS} %s\n" "$1"; }
+warn()    { printf "${OR}[!]${RS} %s\n" "$1"; }
+success() { printf "${GR}[✓]${RS} %s\n" "$1"; }
+error()   { printf "${RD}[✗]${RS} %s\n" "$1"; }
+step()    { printf "\n${GR}[→]${RS} ${W}%s${RS}\n" "$1"; }
 
 progress_bar() {
     local task="$1"
     local duration="${2:-2}"
     local width=20
-    local char="█"
-    local empty="░"
     local task_padded
-    task_padded=$(printf "%-28s" "${task:0:28}")
+    task_padded=$(printf "%-26s" "${task:0:26}")
 
-    for i in $(seq 0 100); do
-        local filled=$((i * width / 100))
-        local bar=""
-        local spa=""
-        for _ in $(seq 1 $filled 2>/dev/null); do bar="${bar}${char}"; done 2>/dev/null
-        for _ in $(seq 1 $((width - filled)) 2>/dev/null); do spa="${spa}${empty}"; done 2>/dev/null
-        # simpler fallback
-        bar=$(printf "%${filled}s" | tr ' ' "$char")
-        spa=$(printf "%$((width - filled))s" | tr ' ' "$empty")
-        local color="$Y"
-        (( i == 100 )) && color="$G"
-        printf "\r  ${DIM}%s${RESET} ${color}[%s%s]${RESET} ${W}%3d%%${RESET}" \
-            "$task_padded" "$bar" "$spa" "$i"
-        sleep "$(awk "BEGIN{print $duration/100}")"
+    for i in $(seq 0 4 100); do
+        local filled=$(( i * width / 100 ))
+        local bar
+        bar=$(printf "%${filled}s" "" | tr ' ' '#')
+        local spa
+        spa=$(printf "%$(( width - filled ))s" "" | tr ' ' '-')
+        local color="$OR"
+        [ "$i" -ge 100 ] && color="$GR"
+        printf "\r  %s %s[%s%s]%s %3d%%" \
+            "$task_padded" "$color" "$bar" "$spa" "$RS" "$i"
+        sleep "$(awk "BEGIN{printf \"%.3f\", $duration/25}")"
     done
-    echo
+    printf "\r  %s ${GR}[%s]${RS} 100%%\n" \
+        "$task_padded" "$(printf '%0.s#' $(seq 1 $width))"
 }
