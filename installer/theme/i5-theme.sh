@@ -138,6 +138,7 @@ OS=$(echo "$OS" | awk '{$1=$1;print}' | cut -c1-20)
 KERNEL=$(uname -r 2>/dev/null | cut -c1-20)
 SHELL_NAME=$(basename "$SHELL")
 UPTIME=$(uptime -p 2>/dev/null | sed 's/up //' | cut -c1-20)
+PKGS=$(pkg list-installed 2>/dev/null | wc -l)
 
 # Device status
 if [ -f "/system/bin/su" ] || [ -f "/system/xbin/su" ]; then
@@ -146,18 +147,28 @@ else
     DEVICE_STATUS="${c7}Standard${c0}"
 fi
 
-# Battery % + charging status
-BAT_PATH="/sys/class/power_supply/battery"
-if [ -f "$BAT_PATH/capacity" ]; then
-    BAT_PCT=$(cat "$BAT_PATH/capacity" 2>/dev/null)
-    BAT_STATUS=$(cat "$BAT_PATH/status" 2>/dev/null)
+# Battery — Termux API or sysfs fallback
+BAT_PCT=""
+BAT_STATUS=""
+if command -v termux-battery-status >/dev/null 2>&1; then
+    BAT_JSON=$(termux-battery-status 2>/dev/null)
+    BAT_PCT=$(echo "$BAT_JSON" | grep '"percentage"' | grep -oP '\d+')
+    BAT_RAW=$(echo "$BAT_JSON" | grep '"status"' | grep -oP '"[A-Z_]+"' | tr -d '"')
+    BAT_STATUS="$BAT_RAW"
+else
+    for p in /sys/class/power_supply/battery /sys/class/power_supply/Battery; do
+        [ -f "$p/capacity" ] && BAT_PCT=$(cat "$p/capacity") && BAT_STATUS=$(cat "$p/status" 2>/dev/null) && break
+    done
+fi
+
+if [ -n "$BAT_PCT" ]; then
     case "$BAT_STATUS" in
-        Charging)    BAT_ICON="${c2}[charging]${c0}" ;;
-        Full)        BAT_ICON="${c2}[full]${c0}" ;;
-        Discharging) BAT_ICON="${c6}[discharging]${c0}" ;;
-        *)           BAT_ICON="" ;;
+        Charging|CHARGING)       BAT_ICON="${c2}[charging]${c0}" ;;
+        Full|FULL)               BAT_ICON="${c2}[full]${c0}" ;;
+        Discharging|DISCHARGING) BAT_ICON="${c6}[discharging]${c0}" ;;
+        *)                       BAT_ICON="" ;;
     esac
-    BATTERY="${BAT_PCT}% ${BAT_ICON}"
+    BATTERY="${BAT_PCT}% $(echo -e "$BAT_ICON")"
 else
     BATTERY="Unknown"
 fi
@@ -188,15 +199,16 @@ echo -e "  ┏━━━━━━━━━━━━━━━━━━━━━━
 echo -e "  ┃ ${COLORED_NAME}${SPACES}  ${c5}●${c0} ${c6}●${c0} ${c7}●${c0} ┃  ${c3}${USER}${c5}@${c0}${c3}${HOST}${c0}"
 echo -e "  ┣━━━━━━━━━━━━━━━━━━━━━━┫"
 echo -e "  ┃                      ┃  ${c1}  phone${c0} : ${MODEL}"
-echo -e "  ┃        ${c3}( ${c3}• ${c8}ᴗ ${c3}•${c3} )${c0}       ┃  ${c2}     os${c0} : ${OS}"
-echo -e "  ┃         ${c9}( ω )${c8}═══${c0}       ┃  ${c7}    ker${c0} : ${KERNEL}"
-echo -e "  ┃        ${c8}⌐(${c9}_${c8})¬${c0}          ┃  ${c4} device${c0} : $(echo -e "$DEVICE_STATUS")"
-echo -e "  ┃                      ┃  ${c5}     sh${c0} : ${SHELL_NAME}"
+echo -e "  ┃        ${c8}·  ·${c0}          ┃  ${c2}     os${c0} : ${OS}"
+echo -e "  ┃       ${c6}[####]${c0}         ┃  ${c7}    ker${c0} : ${KERNEL}"
+echo -e "  ┃       ${c3}/|  |\\${c0}         ┃  ${c4} device${c0} : $(echo -e "$DEVICE_STATUS")"
+echo -e "  ┃      ${c6}[_${c8}\\;/${c6}_]${c0}        ┃  ${c5}     sh${c0} : ${SHELL_NAME}"
 echo -e "  ┃                      ┃  ${c6}     up${c0} : ${UPTIME}"
-echo -e "  ┃   Powered ${c1}by${c0} Linux   ┃  ${c1}    bat${c0} : $(echo -e "$BATTERY")"
+echo -e "  ┃  android ${c5}♥${c0} termux   ┃  ${c1}    bat${c0} : $(echo -e "$BATTERY")"
 echo -e "  ┃                      ┃  ${c1}    ram${c0} : ${RAM}"
 echo -e "  ┃                      ┃  ${c2}   disk${c0} : ${DISK}"
-echo -e "  ┗━━━━━━━━━━━━━━━━━━━━━━┛  ${c1}━━━${c2}━━━${c3}━━━${c4}━━━${c5}━━━${c6}━━━${c7}━━━"
+echo -e "  ┗━━━━━━━━━━━━━━━━━━━━━━┛  ${c7}   pkgs${c0} : ${PKGS}"
+echo -e "                            ${c1}━━━${c2}━━━${c3}━━━${c4}━━━${c5}━━━${c6}━━━${c7}━━━"
 echo -e "\n"
 EOF
 
