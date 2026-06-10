@@ -51,7 +51,7 @@
 
 ## Overview
 
-**Termux Theme Changer (TTC)** is a fully automated, pure-shell Termux customization suite. One command installs everything — dependencies, ZSH plugins, custom fonts, a personalized ASCII banner, and a themed color palette. It also auto-updates from GitHub every time you run `ttc`.
+**Termux Theme Changer (TTC)** is a fully automated, pure-shell Termux customization suite. One command installs everything — dependencies, ZSH plugins, custom fonts, a personalized ASCII banner, and a themed color palette. It auto-detects first-time users and runs setup automatically, and checks for version updates on every launch.
 
 <br>
 
@@ -59,8 +59,10 @@
 
 - **Pure shell** — no Python required, runs entirely in Bash/ZSH.
 - **Auto-install** — missing tools (`git`, `zsh`, `figlet`, `fzf`, etc.) are installed automatically on first run.
-- **Auto-update** — checks GitHub on every `ttc` launch and pulls the latest version silently.
-- **Force Update** option in menu for immediate sync.
+- **First-time detection** — automatically starts theme installation for new users, no extra steps needed.
+- **Version-based update system** — checks `version.json` on GitHub on every launch and notifies you when a new version is available.
+- **Flexible update prompt** — choose to update now, skip once, or skip this version entirely.
+- **Modular structure** — main controller, installer, and updater are separate files for easier maintenance.
 - **Auto-size UI** — all boxes auto-fit to your terminal width.
 - Fully customized ZSH prompt with colors and modern aesthetics.
 - ZSH plugins: autosuggestions, syntax-highlighting, autocomplete, fzf, bgnotify.
@@ -93,7 +95,6 @@ The setup will:
 - Install any missing required tools automatically
 - Set up ZSH plugins, Nerd Font, and color theme
 - Create the `ttc` global command
-- Add auto-update hook to `.zshrc`
 - Auto-launch TTC after setup completes
 
 **Step 3 — Run anytime after install**
@@ -155,11 +156,44 @@ bash ~/restore.sh
 
 | Option | Action |
 |--------|--------|
-| `01` | Start full theme installation |
-| `02` | View developer profile & contacts |
-| `03` | About this tool & version info |
-| `04` | Force update from GitHub (hard reset) |
+| `01` | Install / Reinstall theme |
+| `02` | Check for updates |
+| `03` | View developer profile & contacts |
+| `04` | About this tool & version info |
 | `00` | Exit TTC |
+
+<br>
+
+## Update System
+
+Every time `ttc` launches, it fetches `version.json` from GitHub and compares it with the local version.
+
+| Response | What happens |
+|----------|-------------|
+| `y` | Downloads and applies the latest update |
+| `n` | Skips this time — you will be reminded on next run |
+| `s` | Skips this version permanently — no more reminders for it |
+
+To release a new update, only `version.json` needs to be changed:
+
+```json
+{
+  "version": "3.1.0",
+  "message": "What changed in this version."
+}
+```
+
+<br>
+
+## Auto-Install
+
+On every `ttc` launch, these packages are checked and installed if missing:
+
+```
+git   curl   zsh   figlet   fzf   neofetch
+```
+
+No user input needed — all done automatically.
 
 <br>
 
@@ -191,37 +225,15 @@ bash ~/restore.sh
 
 <br>
 
-## Auto-Update
-
-Every time `ttc` launches it runs two checks:
-
-| Step | What happens |
-|------|-------------|
-| On launch | Compares local commit hash with GitHub. Pulls if different. |
-| Background (`.zshrc` hook) | Silently fetches in background — next launch is faster. |
-
-Use **Option `04` → Force Update** to hard-reset to latest GitHub version anytime.
-
-<br>
-
-## Auto-Install
-
-On every `ttc` launch, these packages are checked and installed if missing:
-
-```
-git   curl   zsh   figlet   fzf   neofetch
-```
-
-No user input needed — all done automatically.
-
-<br>
-
 ## File Structure
 
 ```
 termux-theme-changer/
 ├── ttc.sh                    # Main controller & menu
-├── setup.sh                  # One-time installer
+├── install.sh                # Theme installer (modular)
+├── update.sh                 # Version check & update logic
+├── setup.sh                  # One-time repo setup
+├── version.json              # Current version info (checked on every launch)
 ├── shared/
 │   └── prog.sh               # Shared colors, progress bar, helpers
 ├── installer/

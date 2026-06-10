@@ -133,7 +133,6 @@ run_update_check() {
             warn "Version v${REMOTE_VERSION} skipped. You will not be reminded again for this version."
             ;;
         *)
-            # n or anything else = skip once, remind next run
             warn "Update skipped. You will be reminded next time."
             ;;
     esac
