@@ -130,14 +130,23 @@ auto_update() {
     elif [ "$LOCAL" = "$REMOTE" ]; then
         success "Already up to date. ${DIM}(${LOCAL:0:7})${RS}"
     else
-        info "New update found! Pulling from GitHub..."
-        progress_bar "Downloading update" 2
-        if git -C "$BASE" pull --quiet origin main 2>/dev/null || \
-           git -C "$BASE" pull --quiet origin master 2>/dev/null; then
-            success "Updated! ${DIM}(${REMOTE:0:7})${RS}"
-        else
-            warn "Pull failed — check connection."
-        fi
+        info "New update found! ${DIM}(${REMOTE:0:7})${RS}"
+        printf "  ${OR}Update now?${RS} ${DIM}[y/n]${RS} ${GR}>>${RS} "
+        read -r answer
+        case "$answer" in
+            y|Y)
+                progress_bar "Downloading update" 2
+                if git -C "$BASE" pull --quiet origin main 2>/dev/null || \
+                   git -C "$BASE" pull --quiet origin master 2>/dev/null; then
+                    success "Updated! ${DIM}(${REMOTE:0:7})${RS}"
+                else
+                    warn "Pull failed — check connection."
+                fi
+                ;;
+            *)
+                warn "Update skipped."
+                ;;
+        esac
     fi
     sleep 0.3
 }
@@ -262,10 +271,10 @@ show_menu() {
     _mrow "  ${W}CONTROL PANEL${RS}"
     printf "${GR}+%s+${RS}\n" "$sep"
     _mrow "  ${BG_GR} 01 ${RS}  Start Theme Installation"
-    _mrow "  ${GR}|${RS}  ${BG_GR} 02 ${RS}  Developer Profile"
-    _mrow "  ${GR}|${RS}  ${BG_GR} 03 ${RS}  About This Tool"
-    _mrow "  ${GR}|${RS}  ${BG_OR} 04 ${RS}  Force Update from GitHub"
-    _mrow "  ${GR}|${RS}  ${BG_RD} 00 ${RS}  Exit Application"
+    _mrow "  ${BG_GR} 02 ${RS}  Developer Profile"
+    _mrow "  ${BG_GR} 03 ${RS}  About This Tool"
+    _mrow "  ${BG_OR} 04 ${RS}  Force Update from GitHub"
+    _mrow "  ${BG_RD} 00 ${RS}  Exit Application"
     printf "${GR}+%s+${RS}\n" "$line"
     printf "\n"
 }

@@ -70,12 +70,23 @@ success "'ttc' command created — type: ttc"
 # ── 5. zshrc hook ──
 ZSHRC="$HOME/.zshrc"
 HOOK='# TTC auto-update hook
-[ -d "$HOME/termux-theme-changer/.git" ] && git -C "$HOME/termux-theme-changer" fetch --quiet origin 2>/dev/null &'
+if [ -d "$HOME/termux-theme-changer/.git" ]; then
+    _ttc_local=$(git -C "$HOME/termux-theme-changer" rev-parse HEAD 2>/dev/null)
+    _ttc_remote=$(git -C "$HOME/termux-theme-changer" ls-remote origin HEAD 2>/dev/null | awk '"'"'{print $1}'"'"')
+    if [ -n "$_ttc_remote" ] && [ "$_ttc_local" != "$_ttc_remote" ]; then
+        printf "\n  \033[1;33m[TTC]\033[0m New update available!\n"
+        printf "  \033[2mRun \033[0m\033[1;32mttc\033[0m\033[2m to update\033[0m\n\n"
+    fi
+    unset _ttc_local _ttc_remote
+fi'
 if [ -f "$ZSHRC" ]; then
     grep -q "TTC auto-update hook" "$ZSHRC" || {
         printf "\n%s\n" "$HOOK" >> "$ZSHRC"
         success "Auto-update hook added to .zshrc"
     }
+else
+    printf "\n%s\n" "$HOOK" >> "$ZSHRC"
+    success "Auto-update hook added to .zshrc"
 fi
 
 # ── 6. Done ──
