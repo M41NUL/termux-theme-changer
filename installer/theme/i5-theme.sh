@@ -65,16 +65,14 @@ else
     warn "Failed to download font. Please check internet connection."
 fi
 
-echo -e "\n\e[1;36m┌──────────────────────────────────────────┐\e[0m"
-echo -e "\e[1;36m│\e[0m \e[1;33mName Setup for Terminal Banner\e[0m           \e[1;36m│\e[0m"
-echo -e "\e[1;36m└──────────────────────────────────────────┘\e[0m"
+printf "\n  \033[46;30m Name Setup for Terminal Banner \033[0m\n"
 echo -ne "\e[1;32m❯ Enter Your Fetch Name (e.g. mainul-x): \e[0m"
 read -r INPUT_NAME
 
 # Default name setup and limit character length to 14 to prevent box breaking
 FETCH_NAME=${INPUT_NAME:-mainul-x}
 FETCH_NAME=$(echo "$FETCH_NAME" | cut -c1-14)
-echo -e "\e[1;36m[*] Banner name set to:\e[0m \e[1;35m$FETCH_NAME\e[0m\n"
+printf "  \033[1;36m[*]\033[0m Banner name set to: \033[1;35m%s\033[0m\n\n" "$FETCH_NAME"
 
 progress_bar "Generating theme scripts" 2
 

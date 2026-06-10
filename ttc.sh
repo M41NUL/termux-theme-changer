@@ -3,12 +3,8 @@
 # CODEX-M41NUL TTC - MAIN CONTROLLER
 # Version: 2.0 | © 2026 CODEX-M41NUL. All Rights Reserved.
 # Developer  : Md. Mainul Islam
-# GitHub     : M41NUL  |  https://github.com/M41NUL
+# GitHub     : https://github.com/M41NUL
 # Telegram   : t.me/mdmainulislaminfo
-# TG Channel : https://t.me/codexm41nul
-# TG Group   : https://t.me/codex_m41nul
-# YouTube    : https://youtube.com/@codexm41nul
-# Email      : devmainulislam@gmail.com
 #=======================================
 
 BASE="$HOME/termux-theme-changer"
@@ -17,89 +13,49 @@ INSTALLER_DIR="$BASE/installer"
 REPO_URL="https://github.com/M41NUL/termux-theme-changer.git"
 CURRENT_VERSION="2.0.0"
 
-# ── Colors ──
 GR=$'\033[1;32m'
 RD=$'\033[1;31m'
 OR=$'\033[38;5;208m'
+CY=$'\033[1;36m'
 W=$'\033[1;37m'
+YL=$'\033[1;33m'
 DIM=$'\033[2m'
+BLD=$'\033[1m'
 RS=$'\033[0m'
+BG_GR=$'\033[42;30m'
+BG_OR=$'\033[48;5;208;30m'
+BG_RD=$'\033[41;97m'
+BG_CY=$'\033[46;30m'
 
-info()    { printf "${OR}[*]${RS} %s\n" "$1"; }
-success() { printf "${GR}[+]${RS} %s\n" "$1"; }
-warn()    { printf "${OR}[!]${RS} %s\n" "$1"; }
-error()   { printf "${RD}[-]${RS} %s\n" "$1"; }
-step()    { printf "\n${GR}[>]${RS} ${W}%s${RS}\n" "$1"; }
+info()    { printf "  ${CY}[*]${RS} %s\n" "$1"; }
+success() { printf "  ${GR}[+]${RS} %s\n" "$1"; }
+warn()    { printf "  ${YL}[!]${RS} %s\n" "$1"; }
+error()   { printf "  ${RD}[-]${RS} %s\n" "$1"; }
+step()    { printf "\n  ${BG_GR} >> ${RS} ${BLD}%s${RS}\n" "$1"; }
 
-# ── Auto-size box helpers ──
-_box_width() {
-    local cols
-    cols=$(tput cols 2>/dev/null || echo 50)
-    [ "$cols" -gt 70 ] && cols=70
-    [ "$cols" -lt 30 ] && cols=30
-    echo "$cols"
-}
-box_top() {
-    local color="${1:-$GR}" w inner line
-    w=$(_box_width); inner=$(( w - 2 ))
-    line=$(printf '%*s' "$inner" '' | tr ' ' '-')
-    printf "${color}+%s+${RS}\n" "$line"
-}
-box_div() {
-    local color="${1:-$GR}" w inner line
-    w=$(_box_width); inner=$(( w - 2 ))
-    line=$(printf '%*s' "$inner" '' | tr ' ' '=')
-    printf "${color}+%s+${RS}\n" "$line"
-}
-box_bot() { box_top "$@"; }
-box_empty() {
-    local color="${1:-$GR}" w inner
-    w=$(_box_width); inner=$(( w - 2 ))
-    printf "${color}|${RS}%*s${color}|${RS}\n" "$inner" ''
-}
-box_row() {
-    local text="$1" color="${2:-$GR}" align="${3:-l}"
-    local w inner plain plen pad lpad rpad
-    w=$(_box_width); inner=$(( w - 4 ))
-    plain=$(printf '%s' "$text" | sed 's/\x1b\[[0-9;]*m//g')
-    plen=${#plain}; pad=$(( inner - plen ))
-    [ "$pad" -lt 0 ] && pad=0
-    case "$align" in
-        c) lpad=$(( pad / 2 )); rpad=$(( pad - lpad )) ;;
-        r) lpad=$pad; rpad=0 ;;
-        *) lpad=0; rpad=$pad ;;
-    esac
-    printf "${color}|${RS} "
-    printf '%*s' "$lpad" ''
-    printf '%s' "$text"
-    printf '%*s' "$rpad" ''
-    printf " ${color}|${RS}\n"
-}
-
-# ──────────────────────────────────────
-# PROGRESS BAR
-# ──────────────────────────────────────
 progress_bar() {
     local task="$1"
     local duration="${2:-2}"
     local width=20
-    local task_padded
-    task_padded=$(printf "%-26s" "${task:0:26}")
-
-    for i in $(seq 0 4 100); do
+    printf "\n\n"
+    for i in $(seq 0 5 100); do
         local filled=$(( i * width / 100 ))
-        local bar
-        bar=$(printf "%${filled}s" "" | tr ' ' '#')
-        local spa
-        spa=$(printf "%$(( width - filled ))s" "" | tr ' ' '-')
+        local empty=$(( width - filled ))
+        local bar="" spa=""
+        [ "$filled" -gt 0 ] && bar=$(printf '%0.s█' $(seq 1 $filled))
+        [ "$empty"  -gt 0 ] && spa=$(printf '%0.s░' $(seq 1 $empty))
         local color="$OR"
         [ "$i" -ge 100 ] && color="$GR"
-        printf "\r  %s %s[%s%s]%s %3d%%" \
-            "$task_padded" "$color" "$bar" "$spa" "$RS" "$i"
-        sleep "$(awk "BEGIN{printf \"%.3f\", $duration/25}")"
+        printf "\033[2A"
+        printf "  ${DIM}%-24s${RS}  ${color}╭──────────────────────╮${RS}\n" "${task:0:24}"
+        printf "  ${W}Progress: %3d%%${RS}     ${color}│${RS} %s%s%s%s ${color}│${RS}\n" \
+            "$i" "${color}" "${bar}" "${DIM}${spa}${RS}" ""
+        sleep "$(awk "BEGIN{printf \"%.3f\", $duration/20}")"
     done
-    printf "\r  %s ${GR}[%s]${RS} 100%%\n" \
-        "$task_padded" "$(printf '%0.s#' $(seq 1 $width))"
+    printf "\033[2A"
+    printf "  ${DIM}%-24s${RS}  ${GR}╭──────────────────────╮${RS}\n" "${task:0:24}"
+    printf "  ${W}Progress: ${GR}100%%${RS}     ${GR}│${RS} ${GR}$(printf '%0.s█' $(seq 1 20))${RS} ${GR}│${RS}  ${BG_GR} COMPLETE ${RS}\n"
+    printf "\n\n"
 }
 
 # ──────────────────────────────────────
@@ -107,31 +63,32 @@ progress_bar() {
 # ──────────────────────────────────────
 show_banner() {
     clear
-    echo ""
-    box_top "$GR"
-    box_empty "$GR"
-    box_row "  ${RD} _____ _____ _____${RS}" "$GR"
-    box_row "  ${OR}|_   _|_   _/ ____|${RS}" "$GR"
-    box_row "  ${GR}  | |   | || |     ${RS}  ${W}Termux Theme${RS}" "$GR"
-    box_row "  ${OR}  | |   | || |___  ${RS}  ${W}Changer v${CURRENT_VERSION}${RS}" "$GR"
-    box_row "  ${RD}  |_|   |_| \_____|${RS}" "$GR"
-    box_empty "$GR"
-    box_div "$GR"
-    box_row "  ${DIM}Owner${RS} : ${OR}CODEX-M41NUL${RS}  ${DIM}Dev${RS}: ${W}M41NUL${RS}" "$GR"
-    box_row "  ${DIM}GitHub${RS}: ${GR}github.com/M41NUL${RS}" "$GR"
-    box_bot "$GR"
-    echo ""
+    local cols
+    cols=$(tput cols 2>/dev/null || echo 40)
+    [ "$cols" -gt 60 ] && cols=60
+
+    printf "\n"
+    # TTC ASCII art — colored, no box
+    printf "  ${RD} _____ _____ _____${RS}\n"
+    printf "  ${OR}|_   _|_   _/ ____|${RS}\n"
+    printf "  ${GR}  | |   | || |${RS}     ${W}Termux Theme Changer${RS}\n"
+    printf "  ${OR}  | |   | || |___${RS}   ${BG_CY} v${CURRENT_VERSION} ${RS}\n"
+    printf "  ${RD}  |_|   |_| \_____|${RS}\n"
+    printf "\n"
+    # Highlighted owner line
+    printf "  ${BG_GR} Owner ${RS} ${W}CODEX-M41NUL${RS}   ${BG_CY} Dev ${RS} ${W}M41NUL${RS}\n"
+    printf "  ${DIM}github.com/M41NUL${RS}\n"
+    printf "\n"
 }
 
 # ──────────────────────────────────────
-# STEP 1 — AUTO INSTALL MISSING TOOLS
+# AUTO INSTALL
 # ──────────────────────────────────────
 auto_install_deps() {
     step "Checking required tools..."
 
     local TOOLS=("git" "curl" "zsh" "figlet" "fzf" "neofetch")
     local missing=()
-
     for tool in "${TOOLS[@]}"; do
         command -v "$tool" >/dev/null 2>&1 || missing+=("$tool")
     done
@@ -141,25 +98,23 @@ auto_install_deps() {
         return 0
     fi
 
-    info "Missing: ${missing[*]}"
-    info "Installing missing packages..."
+    warn "Missing: ${missing[*]}"
     apt update -qq >/dev/null 2>&1 || true
 
     for tool in "${missing[@]}"; do
-        printf "  ${OR}[*]${RS} Installing ${W}%-16s${RS} " "$tool..."
+        printf "  ${CY}[*]${RS} Installing ${BLD}%-14s${RS} " "$tool..."
         if pkg install -y "$tool" >/dev/null 2>&1; then
-            printf "${GR}[+] Done${RS}\n"
+            printf "${BG_GR} DONE ${RS}\n"
         else
-            printf "${RD}[-] Failed${RS}\n"
+            printf "${BG_RD} FAIL ${RS}\n"
         fi
     done
-
     success "All tools ready."
     sleep 0.5
 }
 
 # ──────────────────────────────────────
-# STEP 2 — AUTO UPDATE CHECK
+# AUTO UPDATE
 # ──────────────────────────────────────
 auto_update() {
     step "Checking for updates..."
@@ -176,31 +131,26 @@ auto_update() {
     if [ "$REMOTE" = "none" ]; then
         warn "No internet — skipping update."
     elif [ "$LOCAL" = "$REMOTE" ]; then
-        success "Already up to date. (${LOCAL:0:7})"
+        success "Already up to date. ${DIM}(${LOCAL:0:7})${RS}"
     else
         info "New update found! Pulling from GitHub..."
         progress_bar "Downloading update" 2
         if git -C "$BASE" pull --quiet origin main 2>/dev/null || \
            git -C "$BASE" pull --quiet origin master 2>/dev/null; then
-            success "Updated! (${REMOTE:0:7})"
+            success "Updated! ${DIM}(${REMOTE:0:7})${RS}"
         else
             warn "Pull failed — check connection."
         fi
     fi
-
     sleep 0.3
 }
 
 # ──────────────────────────────────────
-# MENU — 01: THEME INSTALLATION
+# THEME INSTALL
 # ──────────────────────────────────────
 run_installer() {
     clear
-    echo ""
-    box_top "$GR"
-    box_row "     ${GR}STARTING THEME INSTALLATION${RS}" "$GR" "l"
-    box_bot "$GR"
-    echo ""
+    printf "\n  ${BG_CY} STARTING THEME INSTALLATION ${RS}\n\n"
     sleep 0.5
 
     local SCRIPTS=(
@@ -223,65 +173,55 @@ run_installer() {
         fi
     done
 
-    echo ""
-    printf "${OR}  Press Enter to return to menu...${RS}"
+    printf "\n  ${OR}Press Enter to return to menu...${RS} "
     read -r
 }
 
 # ──────────────────────────────────────
-# MENU — 02: DEVELOPER PROFILE
+# DEV PROFILE
 # ──────────────────────────────────────
 dev_info() {
     clear
     show_banner
-    box_top "$GR"
-    box_row "          ${W}DEVELOPER PROFILE${RS}" "$GR" "l"
-    box_div "$GR"
-    box_row "  ${DIM}Name    ${RS}: ${W}Md. Mainul Islam${RS}" "$GR"
-    box_row "  ${DIM}Alias   ${RS}: ${OR}CODEX-M41NUL${RS}" "$GR"
-    box_row "  ${DIM}GitHub  ${RS}: ${GR}github.com/M41NUL${RS}" "$GR"
-    box_row "  ${DIM}TG      ${RS}: ${GR}t.me/mdmainulislaminfo${RS}" "$GR"
-    box_row "  ${DIM}Channel ${RS}: ${GR}t.me/codexm41nul${RS}" "$GR"
-    box_row "  ${DIM}Group   ${RS}: ${GR}t.me/codex_m41nul${RS}" "$GR"
-    box_row "  ${DIM}YouTube ${RS}: ${RD}youtube.com/@codexm41nul${RS}" "$GR"
-    box_row "  ${DIM}WA      ${RS}: ${GR}+8801308850528${RS}" "$GR"
-    box_row "  ${DIM}Email   ${RS}: ${OR}devmainulislam@gmail.com${RS}" "$GR"
-    box_div "$GR"
-    box_row "  ${DIM}© 2026 CODEX-M41NUL. All Rights Reserved.${RS}" "$GR"
-    box_bot "$GR"
-    echo ""
-    printf "${OR}  Press Enter to return...${RS}"
+    printf "  ${BG_CY} DEVELOPER PROFILE ${RS}\n\n"
+    printf "  ${DIM}Name    ${RS}: ${W}Md. Mainul Islam${RS}\n"
+    printf "  ${DIM}Alias   ${RS}: ${OR}CODEX-M41NUL${RS}\n"
+    printf "  ${DIM}GitHub  ${RS}: ${GR}github.com/M41NUL${RS}\n"
+    printf "  ${DIM}TG      ${RS}: ${CY}t.me/mdmainulislaminfo${RS}\n"
+    printf "  ${DIM}Channel ${RS}: ${CY}t.me/codexm41nul${RS}\n"
+    printf "  ${DIM}Group   ${RS}: ${CY}t.me/codex_m41nul${RS}\n"
+    printf "  ${DIM}YouTube ${RS}: ${RD}youtube.com/@codexm41nul${RS}\n"
+    printf "  ${DIM}WA      ${RS}: ${GR}+8801308850528${RS}\n"
+    printf "  ${DIM}Email   ${RS}: ${OR}devmainulislam@gmail.com${RS}\n"
+    printf "\n  ${DIM}© 2026 CODEX-M41NUL. All Rights Reserved.${RS}\n\n"
+    printf "  ${OR}Press Enter to return...${RS} "
     read -r
 }
 
 # ──────────────────────────────────────
-# MENU — 03: ABOUT
+# ABOUT
 # ──────────────────────────────────────
 about_tool() {
     clear
     show_banner
-    box_top "$GR"
-    box_row "          ${W}ABOUT THIS TOOL${RS}" "$GR" "l"
-    box_div "$GR"
-    box_row "  ${OR}>${RS} Advanced Termux customization suite" "$GR"
-    box_row "  ${OR}>${RS} Auto-install all required packages" "$GR"
-    box_row "  ${OR}>${RS} Auto-update from GitHub on every run" "$GR"
-    box_row "  ${OR}>${RS} ZSH + Plugins (auto, highlight, fzf)" "$GR"
-    box_row "  ${OR}>${RS} Custom Nerd Font integration" "$GR"
-    box_row "  ${OR}>${RS} logo-ls with icons" "$GR"
-    box_row "  ${OR}>${RS} RXFETCH-style terminal banner" "$GR"
-    box_row "  ${OR}>${RS} One-click full system restore" "$GR"
-    box_div "$GR"
-    box_row "  ${DIM}Version${RS} : ${GR}${CURRENT_VERSION}${RS}" "$GR"
-    box_row "  ${DIM}Repo   ${RS} : ${GR}github.com/M41NUL/ttc${RS}" "$GR"
-    box_bot "$GR"
-    echo ""
-    printf "${OR}  Press Enter to return...${RS}"
+    printf "  ${BG_CY} ABOUT THIS TOOL ${RS}\n\n"
+    printf "  ${GR}+${RS} Advanced Termux customization suite\n"
+    printf "  ${GR}+${RS} Auto-install all required packages\n"
+    printf "  ${GR}+${RS} Auto-update from GitHub on every run\n"
+    printf "  ${GR}+${RS} ZSH + Plugins (auto, highlight, fzf)\n"
+    printf "  ${GR}+${RS} Custom Nerd Font integration\n"
+    printf "  ${GR}+${RS} logo-ls with icons\n"
+    printf "  ${GR}+${RS} RXFETCH-style terminal banner\n"
+    printf "  ${GR}+${RS} One-click full system restore\n"
+    printf "\n"
+    printf "  ${DIM}Version${RS} : ${BG_GR} ${CURRENT_VERSION} ${RS}\n"
+    printf "  ${DIM}Repo   ${RS} : ${GR}github.com/M41NUL/ttc${RS}\n\n"
+    printf "  ${OR}Press Enter to return...${RS} "
     read -r
 }
 
 # ──────────────────────────────────────
-# MENU — 04: FORCE UPDATE
+# FORCE UPDATE
 # ──────────────────────────────────────
 force_update() {
     clear
@@ -295,8 +235,7 @@ force_update() {
     else
         warn "Force update failed — check connection."
     fi
-    echo ""
-    printf "${OR}  Press Enter to return...${RS}"
+    printf "\n  ${OR}Press Enter to return...${RS} "
     read -r
 }
 
@@ -304,16 +243,13 @@ force_update() {
 # MAIN MENU
 # ──────────────────────────────────────
 show_menu() {
-    box_top "$GR"
-    box_row "           ${W}CONTROL PANEL${RS}" "$GR" "l"
-    box_div "$GR"
-    box_row "  ${GR}01${RS}  |  ${W}Start Theme Installation${RS}" "$GR"
-    box_row "  ${GR}02${RS}  |  ${W}Developer Profile${RS}" "$GR"
-    box_row "  ${GR}03${RS}  |  ${W}About This Tool${RS}" "$GR"
-    box_row "  ${OR}04${RS}  |  ${W}Force Update from GitHub${RS}" "$GR"
-    box_row "  ${RD}00${RS}  |  ${RD}Exit Application${RS}" "$GR"
-    box_bot "$GR"
-    echo ""
+    printf "  ${BG_CY} CONTROL PANEL ${RS}\n\n"
+    printf "  ${BG_GR} 01 ${RS}  Start Theme Installation\n"
+    printf "  ${BG_GR} 02 ${RS}  Developer Profile\n"
+    printf "  ${BG_GR} 03 ${RS}  About This Tool\n"
+    printf "  ${BG_OR} 04 ${RS}  Force Update from GitHub\n"
+    printf "  ${BG_RD} 00 ${RS}  Exit Application\n"
+    printf "\n"
 }
 
 # ──────────────────────────────────────
@@ -328,7 +264,7 @@ main() {
     while true; do
         show_banner
         show_menu
-        printf "  ${GR}SELECT${RS} ${DIM}[01/02/03/04/00]${RS} ${GR}>>${RS} "
+        printf "  ${GR}SELECT${RS} ${DIM}[01-04 / 00]${RS} ${GR}>>${RS} "
         read -r choice
 
         case "$choice" in
@@ -337,13 +273,11 @@ main() {
             3|03) about_tool ;;
             4|04) force_update ;;
             0|00)
-                echo ""
-                echo -e "  ${RD}Shutting down. Goodbye.${RS}"
-                echo ""
+                printf "\n  ${BG_RD} BYE ${RS} Shutting down. Goodbye.\n\n"
                 exit 0
                 ;;
             *)
-                echo -e "\n  ${RD}[!] Invalid option. Try again.${RS}\n"
+                printf "\n  ${BG_RD} ERR ${RS} Invalid option. Try again.\n\n"
                 sleep 0.8
                 ;;
         esac
