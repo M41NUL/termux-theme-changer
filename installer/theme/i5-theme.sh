@@ -54,22 +54,25 @@ EOF
 
 info "Downloading Font..."
 progress_bar "Installing custom font" 3
-FONT_URL="https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/JetBrainsMono/Ligatures/Regular/JetBrainsMonoNerdFont-Regular.ttf"
+# Updated Font URL
+FONT_URL="https://raw.githubusercontent.com/M41NUL/termux-theme-changer/main/Font/font.ttf"
 
 if curl -L --silent --show-error --fail -o "$TERMUX_DIR/font.ttf" "$FONT_URL"; then
     info "Font installed successfully!"
 else
-    warn "Failed to download font. Please check internet connection."
+    warn "Failed to download font. Please check your internet connection."
 fi
 
-BG="\e[44;1;97m"
-RESET="\e[0m"
-
-echo -e "\n${BG}   Name Setup for Terminal Banner   ${RESET}"
-echo -ne "${BG} ❯ Enter Your Fetch Name: ${RESET}"
+# --- Name Input Section ---
+echo -e "\n\e[1;36m┌──────────────────────────────────────────┐\e[0m"
+echo -e "\e[1;36m│\e[0m \e[1;33mName Setup for Terminal Banner\e[0m           \e[1;36m│\e[0m"
+echo -e "\e[1;36m└──────────────────────────────────────────┘\e[0m"
+echo -ne "\e[1;32m❯ Enter Your Name (Default: CODEX-M41NUL): \e[0m"
 read -r INPUT_NAME
 
+# Set default name to CODEX-M41NUL if empty
 FETCH_NAME=${INPUT_NAME:-CODEX-M41NUL}
+# Limit to 14 chars to prevent box breaking
 FETCH_NAME=$(echo "$FETCH_NAME" | cut -c1-14)
 echo -e "\e[1;36m[*] Banner name set to:\e[0m \e[1;35m$FETCH_NAME\e[0m\n"
 
@@ -83,84 +86,73 @@ info "Creating themes banner.sh"
 
 cat > "$RXFETCH_SH" <<EOF
 #!/usr/bin/env bash
-FETCH_NAME="$FETCH_NAME"
+MY_NAME="$FETCH_NAME"
 EOF
 
 cat >> "$RXFETCH_SH" <<'EOF'
-c0="\033[0m"
-c1="\033[1;35m" 
-c2="\033[1;32m" 
-c3="\033[1;37m" 
-c4="\033[1;34m" 
-c5="\033[1;31m" 
-c6="\033[1;33m" 
-c7="\033[1;36m" 
-c8="\033[1;30m" 
+magenta="\033[1;35m"; green="\033[1;32m"; white="\033[1;37m"
+blue="\033[1;34m"; red="\033[1;31m"; black="\033[1;40;30m"
+yellow="\033[1;33m"; cyan="\033[1;36m"; reset="\033[0m"
+bgyellow="\033[1;43;33m"; bgwhite="\033[1;47;37m"
 
-NAME="$FETCH_NAME"
-COLORS=($c1 $c2 $c6 $c4 $c7 $c1 $c3 $c5)
+c0=${reset}; c1=${magenta}; c2=${green}; c3=${white}; c4=${blue}
+c5=${red}; c6=${yellow}; c7=${cyan}; c8=${black}; c9=${bgyellow}; c10=${bgwhite}
+
+# Rainbow Color for Name
+COLORS=($c1 $c2 $c7 $c4 $c5 $c6 $c3)
 COLORED_NAME=""
-for (( i=0; i<${#NAME}; i++ )); do
-    CHAR="${NAME:$i:1}"
-    COLOR="${COLORS[$((i % 8))]}"
+for (( i=0; i<${#MY_NAME}; i++ )); do
+    CHAR="${MY_NAME:$i:1}"
+    COLOR="${COLORS[$((i % 7))]}"
     COLORED_NAME="${COLORED_NAME}${COLOR}${CHAR}"
 done
 COLORED_NAME="${COLORED_NAME}${c0}"
 
-# Exact spacing calculation to keep dots on the right edge and box perfectly straight
-NAME_LEN=${#NAME}
-SPACE_LEN=$((16 - NAME_LEN))
-if [ "$SPACE_LEN" -lt 1 ]; then SPACE_LEN=1; fi
-SPACES=$(printf '%*s' "$SPACE_LEN" '')
+# Auto spacing to keep box straight (14 is max width)
+NAME_LEN=${#MY_NAME}
+SPACE_COUNT=$((14 - NAME_LEN))
+if [ $SPACE_COUNT -lt 0 ]; then SPACE_COUNT=0; fi
+SPACES=$(printf '%*s' "$SPACE_COUNT" '')
 
-USER=$(whoami 2>/dev/null || echo "user")
-HOST=$(getprop ro.product.board 2>/dev/null || echo "android")
-
-# Extra spaces removed and variables cut to prevent breaking
-MODEL="$(getprop ro.product.brand 2>/dev/null) $(getprop ro.product.model 2>/dev/null)"
-MODEL=$(echo "$MODEL" | awk '{$1=$1;print}' | cut -c1-22)
-OS="Android $(getprop ro.build.version.release 2>/dev/null) $(uname -m 2>/dev/null)"
-OS=$(echo "$OS" | awk '{$1=$1;print}' | cut -c1-22)
-KERNEL=$(uname -r 2>/dev/null | cut -c1-22)
-PKGS=$(pkg list-installed 2>/dev/null | wc -l)
-SHELL_NAME=$(basename "$SHELL")
-UPTIME=$(uptime -p 2>/dev/null | sed 's/up //')
-
-line=$(free -m 2>/dev/null | grep Mem:)
-if [ -n "$line" ]; then
+# System info
+getCodeName(){ codename="$(getprop ro.product.board)"; }
+getClientBase(){ client_base="$(getprop ro.com.google.clientidbase)"; }
+getModel(){ model="$(getprop ro.product.brand) $(getprop ro.product.model | cut -c1-15)"; }
+getDistro(){ os="Android $(getprop ro.build.version.release)"; }
+getKernel(){ kernel="$(uname -r | cut -c1-15)"; }
+getShell(){ shell=$(basename "$SHELL"); }
+getUptime(){ uptime="$(uptime -p | sed 's/up //')"; }
+getMemoryUsage(){
+    line=$(free -m | grep Mem:)
     total=$(echo $line | awk '{print $2}')
     used=$(echo $line | awk '{print $3}')
-    RAM="${used}MB / ${total}MB"
-else
-    RAM="Unknown"
-fi
-
-line=$(df -h /data 2>/dev/null | tail -1)
-if [ -n "$line" ]; then
+    memory="${used}MB / ${total}MB"
+}
+getDiskUsage(){
+    line=$(df -h /data | tail -1)
     size=$(echo $line | awk '{print $2}')
     used=$(echo $line | awk '{print $3}')
-    avail=$(echo $line | awk '{print $4}')
-    usep=$(echo $line | awk '{print $5}')
-    DISK="${used}B / ${size}B = ${avail}B (${usep})"
-else
-    DISK="Unknown"
-fi
+    storage="${used} / ${size}"
+}
+
+getCodeName; getClientBase; getModel; getDistro; getKernel
+getShell; getUptime; getMemoryUsage; getDiskUsage
 
 # Display banner
 echo -e "\n"
-echo -e "  ┏━━━━━━━━━━━━━━━━━━━━━━┓  ${c3}${USER}${c5}@${c3}${HOST}${c0}"
-echo -e "  ┃ ${COLORED_NAME}${SPACES}${c5}${c0}  ${c6}${c0}  ${c7}${c0} ┃  ${c1}phone${c0}  ${MODEL}"
-echo -e "  ┣━━━━━━━━━━━━━━━━━━━━━━┫  ${c2}os${c0}     ${OS}"
-echo -e "  ┃                      ┃  ${c7}ker${c0}    ${KERNEL}"
-echo -e "  ┃          ${c3}•${c8}${c3}•${c0}          ┃  ${c4}pkgs${c0}   ${PKGS}"
-echo -e "  ┃          ${c8}${c0}${c6}oo${c0}${c8}|${c0}         ┃  ${c5}sh${c0}     ${SHELL_NAME}"
-echo -e "  ┃         ${c8}/${c0}${c3} ${c0}${c8}'\\'${c0}        ┃  ${c6}up${c0}     ${UPTIME}"
-echo -e "  ┃        ${c6}(${c0}${c8}\\_;/${c0}${c6})${c0}        ┃  ${c1}ram${c0}    ${RAM}"
-echo -e "  ┃                      ┃  ${c2}disk${c0}   ${DISK}"
-echo -e "  ┃   Powered ${c1}by${c0} Linux   ┃"
+echo -e "  ┏━━━━━━━━━━━━━━━━━━━━━━┓"
+echo -e "  ┃ ${COLORED_NAME}${SPACES}${c5}${c0}  ${c6}${c0}  ${c7}${c0} ┃  ${codename}${c5}@${c0}${client_base}"
+echo -e "  ┣━━━━━━━━━━━━━━━━━━━━━━┫"
+echo -e "  ┃                      ┃  ${c1}phone${c0}  ${model}"
+echo -e "  ┃          ${c3}•${c8}${c3}•${c0}          ┃  ${c2}os${c0}     ${os}"
+echo -e "  ┃          ${c8}${c0}${c6}oo${c0}${c8}|${c0}         ┃  ${c7}ker${c0}    ${kernel}"
+echo -e "  ┃         ${c8}/${c0}${c3} ${c0}${c8}'\\'${c0}        ┃  ${c5}sh${c0}     ${shell}"
+echo -e "  ┃        ${c6}(${c0}${c8}\\_;/${c0}${c6})${c0}        ┃  ${c6}up${c0}     ${uptime}"
+echo -e "  ┃                      ┃  ${c1}ram${c0}    ${memory}"
+echo -e "  ┃   Powered ${c1}by${c0} Linux   ┃  ${c2}disk${c0}   ${storage}"
 echo -e "  ┗━━━━━━━━━━━━━━━━━━━━━━┛  ${c1}━━━${c2}━━━${c3}━━━${c4}━━━${c5}━━━${c6}━━━${c7}━━━"
 echo -e "\n"
 EOF
 
 chmod +x "$RXFETCH_SH"
-info "Theme setup completed!"
+info "Theme setup completed by CODEX-M41NUL!"
