@@ -3,7 +3,6 @@
 # CODEX-M41NUL - INSTALLER - I5-THEME.SH
 # Version: 2.0 | © 2026 CODEX-M41NUL. All Rights Reserved.
 # Developer : Md. Mainul Islam
-# Updated by: AI Helper (Fixed Logo & Removed Battery)
 #=======================================
 
 BASE="$HOME/termux-theme-changer"
@@ -84,6 +83,7 @@ FETCH_NAME="$FETCH_NAME"
 EOF
 
 cat >> "$RXFETCH_SH" <<'EOF'
+# Colors
 c0="\033[0m"
 c1="\033[1;35m"
 c2="\033[1;32m"
@@ -93,7 +93,12 @@ c5="\033[1;31m"
 c6="\033[1;33m"
 c7="\033[1;36m"
 c8="\033[1;30m"
+# Background block colors (robot body)
+bgyellow="\033[1;43;30m"   # হলুদ bg — মাথা ও পা
+bgwhite="\033[1;47;37m"    # সাদা bg — বুক
+bgdark="\033[1;40;30m"     # কালো bg — হাত/outline
 
+# Colored name
 NAME="$FETCH_NAME"
 COLORS=("$c1" "$c2" "$c7" "$c4" "$c5" "$c6" "$c7" "$c1" "$c3" "$c5")
 COLORED_NAME=""
@@ -109,6 +114,7 @@ SPACE_LEN=$(( 12 - NAME_LEN ))
 [ "$SPACE_LEN" -lt 1 ] && SPACE_LEN=1
 SPACES=$(printf '%*s' "$SPACE_LEN" '')
 
+# System info
 USER=$(whoami 2>/dev/null || echo "user")
 HOST=$(getprop ro.product.board 2>/dev/null || echo "android")
 BRAND=$(getprop ro.product.brand 2>/dev/null)
@@ -120,7 +126,6 @@ SHELL_NAME=$(basename "$SHELL")
 UPTIME=$(uptime -p 2>/dev/null | sed 's/up //' | cut -c1-20)
 PKGS=$(pkg list-installed 2>/dev/null | wc -l)
 
-# RAM & Disk Info
 line_mem=$(free -m 2>/dev/null | grep Mem:)
 RAM=$(echo $line_mem | awk '{print $3"MB / "$2"MB"}')
 line_disk=$(df -h /data 2>/dev/null | tail -1)
@@ -137,11 +142,11 @@ echo -e "  ┏━━━━━━━━━━━━━━━━━━━━━━
 echo -e "  ┃ ${COLORED_NAME}${SPACES}  ${c5}●${c0} ${c6}●${c0} ${c7}●${c0} ┃  ${c3}${USER}${c5}@${c0}${c3}${HOST}${c0}"
 echo -e "  ┣━━━━━━━━━━━━━━━━━━━━━━┫"
 echo -e "  ┃                      ┃  ${c1}  phone${c0} : ${MODEL}"
-echo -e "  ┃         ${c3}●   ●${c0}        ┃  ${c2}     os${c0} : ${OS}"
-echo -e "  ┃           ${c8}━${c0}          ┃  ${c7}    ker${c0} : ${KERNEL}"
-echo -e "  ┃          ${c6}█${c8}  ┃${c0}        ┃  ${c4} device${c0} : ${DEVICE_STATUS}"
-echo -e "  ┃        ${c3}█${c8}  / \\${c0}        ┃  ${c5}     sh${c0} : ${SHELL_NAME}"
-echo -e "  ┃      ${c6}█${c8} \\_ ; / ${c6}█${c0}      ┃  ${c6}     up${c0} : ${UPTIME}"
+echo -e "  ┃         ${c3}• •${c0}          ┃  ${c2}     os${c0} : ${OS}"
+echo -e "  ┃        ${bgyellow}  oo  ${c0}         ┃  ${c7}    ker${c0} : ${KERNEL}"
+echo -e "  ┃      ${bgdark} ${c0}${bgwhite}  ${c0}${bgyellow}oo${c0}${bgwhite}  ${c0}${bgdark} ${c0}       ┃  ${c4} device${c0} : ${DEVICE_STATUS}"
+echo -e "  ┃        ${bgyellow}(\_;/)${c0}         ┃  ${c5}     sh${c0} : ${SHELL_NAME}"
+echo -e "  ┃       ${bgyellow} ${c0} ${bgyellow} ${c0}           ┃  ${c6}     up${c0} : ${UPTIME}"
 echo -e "  ┃                      ┃  ${c1}    ram${c0} : ${RAM}"
 echo -e "  ┃  android ${c5}♥${c0} termux   ┃  ${c2}   disk${c0} : ${DISK}"
 echo -e "  ┃                      ┃  ${c7}   pkgs${c0} : ${PKGS}"
