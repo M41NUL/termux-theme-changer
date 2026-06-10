@@ -21,7 +21,7 @@ command -v progress_bar >/dev/null 2>&1 || progress_bar() { printf "[*] %s\n" "$
 info "Writing colors.properties"
 progress_bar "Applying color scheme" 1
 mkdir -p "$TERMUX_DIR"
-cat > "$TERMUX_DIR/colors.properties" <<'EOF'
+cat > "$TERMUX_DIR/colors.properties" <<'CFEOF'
 color0=#2f343f
 color1=#fd6b85
 color2=#63e0be
@@ -41,15 +41,15 @@ color15=#eeeeee
 background=#2a2c3a
 foreground=#eeeeee
 cursor=#fd6b85
-EOF
+CFEOF
 
 info "Writing termux.properties"
 progress_bar "Applying terminal configuration" 1
-cat > "$TERMUX_DIR/termux.properties" <<'EOF'
+cat > "$TERMUX_DIR/termux.properties" <<'TPEOF'
 allow-external-apps = true
 terminal-cursor-blink-rate=600
 terminal-cursor-style = underline
-EOF
+TPEOF
 
 info "Downloading Font..."
 progress_bar "Installing custom font" 3
@@ -77,12 +77,12 @@ RXFETCH_SH="$THEMES_DIR/banner.sh"
 
 info "Creating themes/banner.sh"
 
-cat > "$RXFETCH_SH" <<EOF
+cat > "$RXFETCH_SH" <<NAMEEOF
 #!/usr/bin/env bash
 FETCH_NAME="$FETCH_NAME"
-EOF
+NAMEEOF
 
-cat >> "$RXFETCH_SH" <<'EOF'
+cat >> "$RXFETCH_SH" <<'BANEOF'
 # Colors
 c0="\033[0m"
 c1="\033[1;35m"
@@ -93,12 +93,7 @@ c5="\033[1;31m"
 c6="\033[1;33m"
 c7="\033[1;36m"
 c8="\033[1;30m"
-# Background block colors (robot body)
-bgyellow="\033[1;43;30m"   # হলুদ bg — মাথা ও পা
-bgwhite="\033[1;47;37m"    # সাদা bg — বুক
-bgdark="\033[1;40;30m"     # কালো bg — হাত/outline
 
-# Colored name
 NAME="$FETCH_NAME"
 COLORS=("$c1" "$c2" "$c7" "$c4" "$c5" "$c6" "$c7" "$c1" "$c3" "$c5")
 COLORED_NAME=""
@@ -114,7 +109,6 @@ SPACE_LEN=$(( 12 - NAME_LEN ))
 [ "$SPACE_LEN" -lt 1 ] && SPACE_LEN=1
 SPACES=$(printf '%*s' "$SPACE_LEN" '')
 
-# System info
 USER=$(whoami 2>/dev/null || echo "user")
 HOST=$(getprop ro.product.board 2>/dev/null || echo "android")
 BRAND=$(getprop ro.product.brand 2>/dev/null)
@@ -142,17 +136,18 @@ echo -e "  ┏━━━━━━━━━━━━━━━━━━━━━━
 echo -e "  ┃ ${COLORED_NAME}${SPACES}  ${c5}●${c0} ${c6}●${c0} ${c7}●${c0} ┃  ${c3}${USER}${c5}@${c0}${c3}${HOST}${c0}"
 echo -e "  ┣━━━━━━━━━━━━━━━━━━━━━━┫"
 echo -e "  ┃                      ┃  ${c1}  phone${c0} : ${MODEL}"
-echo -e "  ┃         ${c3}• •${c0}          ┃  ${c2}     os${c0} : ${OS}"
-echo -e "  ┃        ${bgyellow}  oo  ${c0}         ┃  ${c7}    ker${c0} : ${KERNEL}"
-echo -e "  ┃      ${bgdark} ${c0}${bgwhite}  ${c0}${bgyellow}oo${c0}${bgwhite}  ${c0}${bgdark} ${c0}       ┃  ${c4} device${c0} : ${DEVICE_STATUS}"
-echo -e "  ┃        ${bgyellow}(\_;/)${c0}         ┃  ${c5}     sh${c0} : ${SHELL_NAME}"
-echo -e "  ┃       ${bgyellow} ${c0} ${bgyellow} ${c0}           ┃  ${c6}     up${c0} : ${UPTIME}"
-echo -e "  ┃                      ┃  ${c1}    ram${c0} : ${RAM}"
-echo -e "  ┃  android ${c5}♥${c0} termux   ┃  ${c2}   disk${c0} : ${DISK}"
-echo -e "  ┃                      ┃  ${c7}   pkgs${c0} : ${PKGS}"
+echo -e "  ┃    ${c8}.---.${c0}             ┃  ${c2}     os${c0} : ${OS}"
+echo -e "  ┃   ${c8}/${c0}     ${c8}\\${c0}            ┃  ${c7}    ker${c0} : ${KERNEL}"
+echo -e "  ┃   ${c8}\\.${c5}@${c8}-${c5}@${c8}./${c0}            ┃  ${c4} device${c0} : ${DEVICE_STATUS}"
+echo -e "  ┃   ${c8}/${c6}\`${c8}\\_/${c6}\`${c8}\\${c0}            ┃  ${c5}     sh${c0} : ${SHELL_NAME}"
+echo -e "  ┃   ${c8}//${c0}  ${c6}_${c0}  ${c8}\\\\${c0}           ┃  ${c6}     up${c0} : ${UPTIME}"
+echo -e "  ┃   ${c8}| \\${c0}   ${c8})|_${c0}           ┃  ${c1}    ram${c0} : ${RAM}"
+echo -e "  ┃  ${c8}/${c6}\`${c8}\\_\`>${c0}  ${c8}<_/ \\${c0}        ┃  ${c2}   disk${c0} : ${DISK}"
+echo -e "  ┃  ${c8}\\__/'---'\\__/${c0}        ┃  ${c7}   pkgs${c0} : ${PKGS}"
+echo -e "  ┃  android ${c5}♥${c0} termux   ┃"
 echo -e "  ┗━━━━━━━━━━━━━━━━━━━━━━┛  ${c1}━━${c2}━━${c3}━━${c4}━━${c5}━━${c6}━━${c7}━━${c1}━━${c2}━━"
 echo -e "\n"
-EOF
+BANEOF
 
 chmod +x "$RXFETCH_SH"
 success "Theme setup completed successfully!"
