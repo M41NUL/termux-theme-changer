@@ -185,13 +185,15 @@ function getMemoryUsage() {
 }
 
 function getDiskUsage() {
-  _MOUNTED_ON="/data"
-  _GREP_ONE_ROW="$(df -h | grep ${_MOUNTED_ON})"
+  _GREP_ONE_ROW="$(df -h /data/data/com.termux 2>/dev/null | tail -1)"
+  if [ -z "$_GREP_ONE_ROW" ]; then
+    _GREP_ONE_ROW="$(df -h ~ | tail -1)"
+  fi
   _SIZE="$(echo ${_GREP_ONE_ROW} | awk '{print $2}')"
   _USED="$(echo ${_GREP_ONE_ROW} | awk '{print $3}')"
   _AVAIL="$(echo ${_GREP_ONE_ROW} | awk '{print $4}')"
   _USE="$(echo ${_GREP_ONE_ROW} | awk '{print $5}' | sed 's/%//')"
-  storage="${_USED}B / ${_SIZE}B = ${_AVAIL}B (${_USE}%)"
+  storage="${_USED} / ${_SIZE} (${_USE}%)"
 }
 
 getCodeName; getClientBase; getModel; getDistro; getKernel
@@ -200,7 +202,7 @@ user_host="${c3}${USER}${c5}@${c3}${codename}${c0}"
 
 echo -e "\n\n"
 echo -e "  ┏━━━━━━━━━━━━━━━━━━━━━━┓"
-echo -e "  ┃ ${COLORED_NAME}${SPACES}${c5}${c0}  ${c6}${c0}  ${c7}${c0} ┃  ${user_host}"
+echo -e "  ┃ ${COLORED_NAME}${SPACES}${c5}●${c0}  ${c6}●${c0}  ${c7}●${c0} ┃  ${user_host}"
 echo -e "  ┣━━━━━━━━━━━━━━━━━━━━━━┫  ${c1}phone${c0}  ${model}"
 echo -e "  ┃                      ┃  ${c2}os${c0}     ${os}"
 echo -e "  ┃          ${c3}•${c8}_${c3}•${c0}         ┃  ${c7}ker${c0}    ${kernel}"
@@ -208,7 +210,7 @@ echo -e "  ┃          ${c8}${c9}oo${c0}${c8}|${c0}         ┃  ${c4}pkgs${c0}
 echo -e "  ┃         ${c8}/${c10} ${c0}${c8}'\'${c0}        ┃  ${c5}sh${c0}     ${shell}"
 echo -e "  ┃        ${c9}(${c8}\_;/${c9})${c0}        ┃  ${c6}up${c0}     ${uptime}"
 echo -e "  ┃                      ┃  ${c1}ram${c0}    ${memory}"
-echo -e "  ┃   android ${c1}${c0} termux   ┃  ${c2}disk${c0}   ${storage}"
+echo -e "  ┃   4NDRO1D ${c1}💗${c0} T3RMUX   ┃  ${c2}disk${c0}   ${storage}"
 echo -e "  ┃                      ┃"
 echo -e "  ┗━━━━━━━━━━━━━━━━━━━━━━┛  ${c1}━━━${c2}━━━${c3}━━━${c4}━━━${c5}━━━${c6}━━━${c7}━━━"
 echo -e "\n\n"
