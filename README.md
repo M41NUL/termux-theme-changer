@@ -80,6 +80,8 @@
 **Step 1 — Clone the repo**
 
 ```bash
+apt update && apt upgrade -y
+pkg install git -y
 git clone https://github.com/M41NUL/termux-theme-changer.git
 cd termux-theme-changer
 ```
