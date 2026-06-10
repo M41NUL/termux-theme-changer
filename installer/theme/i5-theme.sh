@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #=======================================
 # CODEX-M41NUL - INSTALLER - I5-THEME.SH
-# Version: 2.0 | © 2026 CODEX-M41NUL. All Rights Reserved.
+# Version   : 2.0 | © 2026 CODEX-M41NUL. All Rights Reserved.
 # Developer : Md. Mainul Islam
 # GitHub    : https://github.com/M41NUL
 # Telegram  : t.me/mdmainulislaminfo
@@ -9,7 +9,6 @@
 #=======================================
 
 BASE="$HOME/termux-theme-changer"
-PLUGINS_DIR="$BASE/plugins"
 TERMUX_DIR="$HOME/.termux"
 SHARED="$BASE/shared/prog.sh"
 
@@ -69,9 +68,9 @@ printf "\n  \033[46;30m Name Setup for Terminal Banner \033[0m\n"
 echo -ne "\e[1;32m❯ Enter Your Fetch Name (e.g. mainul-x): \e[0m"
 read -r INPUT_NAME
 
-# Default name setup and limit character length to 14 to prevent box breaking
+# Default name, limit to 12 chars to fit the new box width
 FETCH_NAME=${INPUT_NAME:-mainul-x}
-FETCH_NAME=$(echo "$FETCH_NAME" | cut -c1-14)
+FETCH_NAME=$(echo "$FETCH_NAME" | cut -c1-12)
 printf "  \033[1;36m[*]\033[0m Banner name set to: \033[1;35m%s\033[0m\n\n" "$FETCH_NAME"
 
 progress_bar "Generating theme scripts" 2
@@ -80,7 +79,7 @@ THEMES_DIR="$BASE/themes"
 mkdir -p "$THEMES_DIR"
 RXFETCH_SH="$THEMES_DIR/banner.sh"
 
-info "Creating themes banner.sh"
+info "Creating themes/banner.sh"
 
 cat > "$RXFETCH_SH" <<EOF
 #!/usr/bin/env bash
@@ -89,44 +88,58 @@ EOF
 
 cat >> "$RXFETCH_SH" <<'EOF'
 c0="\033[0m"
-c1="\033[1;35m" 
-c2="\033[1;32m" 
-c3="\033[1;37m" 
-c4="\033[1;34m" 
-c5="\033[1;31m" 
-c6="\033[1;33m" 
-c7="\033[1;36m" 
-c8="\033[1;30m" 
+c1="\033[1;35m"
+c2="\033[1;32m"
+c3="\033[1;37m"
+c4="\033[1;34m"
+c5="\033[1;31m"
+c6="\033[1;33m"
+c7="\033[1;36m"
+c8="\033[1;30m"
+c9="\033[0;35m"
+c10="\033[0;32m"
 
 NAME="$FETCH_NAME"
-COLORS=($c1 $c2 $c6 $c4 $c7 $c1 $c3 $c5)
+
+# Build colored name (each char gets a color)
+COLORS=("$c1" "$c2" "$c7" "$c4" "$c5" "$c6" "$c7" "$c1" "$c3" "$c5")
 COLORED_NAME=""
 for (( i=0; i<${#NAME}; i++ )); do
     CHAR="${NAME:$i:1}"
-    COLOR="${COLORS[$((i % 8))]}"
+    COLOR="${COLORS[$((i % 10))]}"
     COLORED_NAME="${COLORED_NAME}${COLOR}${CHAR}"
 done
 COLORED_NAME="${COLORED_NAME}${c0}"
 
-# Exact spacing calculation to keep dots on the right edge and box perfectly straight
+# Spacing: box inner width is 22, name area is 12, dots area is 8 (spaces + dots)
 NAME_LEN=${#NAME}
-SPACE_LEN=$((16 - NAME_LEN))
-if [ "$SPACE_LEN" -lt 1 ]; then SPACE_LEN=1; fi
+SPACE_LEN=$(( 12 - NAME_LEN ))
+[ "$SPACE_LEN" -lt 1 ] && SPACE_LEN=1
 SPACES=$(printf '%*s' "$SPACE_LEN" '')
 
+# System info
 USER=$(whoami 2>/dev/null || echo "user")
 HOST=$(getprop ro.product.board 2>/dev/null || echo "android")
 
-# Extra spaces removed and variables cut to prevent breaking
 MODEL="$(getprop ro.product.brand 2>/dev/null) $(getprop ro.product.model 2>/dev/null)"
-MODEL=$(echo "$MODEL" | awk '{$1=$1;print}' | cut -c1-22)
+MODEL=$(echo "$MODEL" | awk '{$1=$1;print}' | cut -c1-20)
+
 OS="Android $(getprop ro.build.version.release 2>/dev/null) $(uname -m 2>/dev/null)"
-OS=$(echo "$OS" | awk '{$1=$1;print}' | cut -c1-22)
-KERNEL=$(uname -r 2>/dev/null | cut -c1-22)
+OS=$(echo "$OS" | awk '{$1=$1;print}' | cut -c1-20)
+
+KERNEL=$(uname -r 2>/dev/null | cut -c1-20)
 PKGS=$(pkg list-installed 2>/dev/null | wc -l)
 SHELL_NAME=$(basename "$SHELL")
-UPTIME=$(uptime -p 2>/dev/null | sed 's/up //')
+UPTIME=$(uptime -p 2>/dev/null | sed 's/up //' | cut -c1-20)
 
+# Device status (rooted or not)
+if [ -f "/system/bin/su" ] || [ -f "/system/xbin/su" ]; then
+    DEVICE_STATUS="${c2}Rooted${c0}"
+else
+    DEVICE_STATUS="${c7}Standard${c0}"
+fi
+
+# RAM
 line=$(free -m 2>/dev/null | grep Mem:)
 if [ -n "$line" ]; then
     total=$(echo $line | awk '{print $2}')
@@ -136,29 +149,31 @@ else
     RAM="Unknown"
 fi
 
+# Storage
 line=$(df -h /data 2>/dev/null | tail -1)
 if [ -n "$line" ]; then
-    size=$(echo $line | awk '{print $2}')
     used=$(echo $line | awk '{print $3}')
+    size=$(echo $line | awk '{print $2}')
     avail=$(echo $line | awk '{print $4}')
     usep=$(echo $line | awk '{print $5}')
-    DISK="${used}B / ${size}B = ${avail}B (${usep})"
+    DISK="${used}B / ${size}B (${usep} used)"
 else
     DISK="Unknown"
 fi
 
 echo -e "\n"
-echo -e "  ${c3}╔═══════════════════════╗${c0}  ${c3}${USER}${c5}@${c3}${HOST}${c0}"
-echo -e "  ${c3}║${c0} ${COLORED_NAME}${SPACES}${c5}●${c0} ${c6}●${c0} ${c7}●${c0} ${c3}║${c0}  "
-echo -e "  ${c3}╠═══════════════════════╣${c0}  ${c1}phone ${c0}: ${MODEL}"
-echo -e "  ${c3}║${c0}                       ${c3}║${c0}  ${c2}os    ${c0}: ${OS}"
-echo -e "  ${c3}║${c0}          ${c3}•${c8}_${c3}•${c0}          ${c3}║${c0}  ${c7}ker   ${c0}: ${KERNEL}"
-echo -e "  ${c3}║${c0}          ${c6}oo${c8}|${c0}          ${c3}║${c0}  ${c4}pkgs  ${c0}: ${PKGS}"
-echo -e "  ${c3}║${c0}         ${c8}/${c0} ${c8}'\\'${c0}         ${c3}║${c0}  ${c5}sh    ${c0}: ${SHELL_NAME}"
-echo -e "  ${c3}║${c0}        ${c6}(${c8}\_;/${c6})${c0}         ${c3}║${c0}  ${c6}up    ${c0}: ${UPTIME}"
-echo -e "  ${c3}║${c0}                       ${c3}║${c0}  ${c1}ram   ${c0}: ${RAM}"
-echo -e "  ${c3}║${c0}   ${c3}android${c0} ${c1}♥${c0} ${c3}termux${c0}    ${c3}║${c0}  ${c2}disk  ${c0}: ${DISK}"
-echo -e "  ${c3}╚═══════════════════════╝${c0}  ${c1}━━${c2}━━${c6}━━${c4}━━${c5}━━${c7}━━${c3}━━${c8}━━${c0}"
+echo -e "  ┏━━━━━━━━━━━━━━━━━━━━━━┓"
+echo -e "  ┃ ${COLORED_NAME}${SPACES}  ${c5}●${c0} ${c6}●${c0} ${c7}●${c0} ┃  ${c3}${USER}${c5}@${c0}${c3}${HOST}${c0}"
+echo -e "  ┣━━━━━━━━━━━━━━━━━━━━━━┫"
+echo -e "  ┃                      ┃  ${c1}phone${c0}  ${MODEL}"
+echo -e "  ┃          ${c3}•${c8}_${c3}•${c0}          ┃  ${c2}os${c0}     ${OS}"
+echo -e "  ┃          ${c9}oo${c8}|${c0}          ┃  ${c7}ker${c0}    ${KERNEL}"
+echo -e "  ┃         ${c8}/${c0} ${c8}'\\'${c0}         ┃  ${c4}device${c0} $(echo -e "$DEVICE_STATUS")"
+echo -e "  ┃        ${c9}(${c0}${c8}\\_;/${c9})${c0}        ┃  ${c5}sh${c0}     ${SHELL_NAME}"
+echo -e "  ┃                      ┃  ${c6}up${c0}     ${UPTIME}"
+echo -e "  ┃   Powered ${c1}by${c0} Linux   ┃  ${c1}ram${c0}    ${RAM}"
+echo -e "  ┃                      ┃  ${c2}disk${c0}   ${DISK}"
+echo -e "  ┗━━━━━━━━━━━━━━━━━━━━━━┛  ${c1}━━━${c2}━━━${c3}━━━${c4}━━━${c5}━━━${c6}━━━${c7}━━━"
 echo -e "\n"
 EOF
 
