@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #=======================================
 # CODEX-M41NUL - INSTALLER - I5-THEME.SH
-# Version: 3.0 | © 2026 CODEX-M41NUL. All Rights Reserved.
+# Version: 2.0 | © 2026 CODEX-M41NUL. All Rights Reserved.
 # Developer : Md. Mainul Islam
 # GitHub    : https://github.com/M41NUL
 # Telegram  : t.me/mdmainulislaminfo
@@ -121,22 +121,45 @@ SPACES=$(printf '%*s' "$SPACE_LEN" '')
 USER=$(whoami 2>/dev/null || echo "user")
 HOST=$(getprop ro.product.board 2>/dev/null || echo "android")
 
-MODEL="$(getprop ro.product.brand 2>/dev/null) $(getprop ro.product.model 2>/dev/null)"
+# Fix double name: brand + model often repeats brand, so use model only
+BRAND=$(getprop ro.product.brand 2>/dev/null)
+MODEL_RAW=$(getprop ro.product.model 2>/dev/null)
+# Remove brand prefix from model if it starts with it (case-insensitive)
+if echo "$MODEL_RAW" | grep -qi "^${BRAND}"; then
+    MODEL="$MODEL_RAW"
+else
+    MODEL="$BRAND $MODEL_RAW"
+fi
 MODEL=$(echo "$MODEL" | awk '{$1=$1;print}' | cut -c1-20)
 
 OS="Android $(getprop ro.build.version.release 2>/dev/null) $(uname -m 2>/dev/null)"
 OS=$(echo "$OS" | awk '{$1=$1;print}' | cut -c1-20)
 
 KERNEL=$(uname -r 2>/dev/null | cut -c1-20)
-PKGS=$(pkg list-installed 2>/dev/null | wc -l)
 SHELL_NAME=$(basename "$SHELL")
 UPTIME=$(uptime -p 2>/dev/null | sed 's/up //' | cut -c1-20)
 
-# Device status (rooted or not)
+# Device status
 if [ -f "/system/bin/su" ] || [ -f "/system/xbin/su" ]; then
     DEVICE_STATUS="${c2}Rooted${c0}"
 else
     DEVICE_STATUS="${c7}Standard${c0}"
+fi
+
+# Battery % + charging status
+BAT_PATH="/sys/class/power_supply/battery"
+if [ -f "$BAT_PATH/capacity" ]; then
+    BAT_PCT=$(cat "$BAT_PATH/capacity" 2>/dev/null)
+    BAT_STATUS=$(cat "$BAT_PATH/status" 2>/dev/null)
+    case "$BAT_STATUS" in
+        Charging)    BAT_ICON="${c2}[charging]${c0}" ;;
+        Full)        BAT_ICON="${c2}[full]${c0}" ;;
+        Discharging) BAT_ICON="${c6}[discharging]${c0}" ;;
+        *)           BAT_ICON="" ;;
+    esac
+    BATTERY="${BAT_PCT}% ${BAT_ICON}"
+else
+    BATTERY="Unknown"
 fi
 
 # RAM
@@ -154,9 +177,8 @@ line=$(df -h /data 2>/dev/null | tail -1)
 if [ -n "$line" ]; then
     used=$(echo $line | awk '{print $3}')
     size=$(echo $line | awk '{print $2}')
-    avail=$(echo $line | awk '{print $4}')
     usep=$(echo $line | awk '{print $5}')
-    DISK="${used}B / ${size}B (${usep} used)"
+    DISK="${used}B / ${size}B (${usep})"
 else
     DISK="Unknown"
 fi
@@ -165,14 +187,15 @@ echo -e "\n"
 echo -e "  ┏━━━━━━━━━━━━━━━━━━━━━━┓"
 echo -e "  ┃ ${COLORED_NAME}${SPACES}  ${c5}●${c0} ${c6}●${c0} ${c7}●${c0} ┃  ${c3}${USER}${c5}@${c0}${c3}${HOST}${c0}"
 echo -e "  ┣━━━━━━━━━━━━━━━━━━━━━━┫"
-echo -e "  ┃                      ┃  ${c1}phone${c0}  ${MODEL}"
-echo -e "  ┃          ${c3}•${c8}_${c3}•${c0}          ┃  ${c2}os${c0}     ${OS}"
-echo -e "  ┃          ${c9}oo${c8}|${c0}          ┃  ${c7}ker${c0}    ${KERNEL}"
-echo -e "  ┃         ${c8}/${c0} ${c8}'\\'${c0}         ┃  ${c4}device${c0} $(echo -e "$DEVICE_STATUS")"
-echo -e "  ┃        ${c9}(${c0}${c8}\\_;/${c9})${c0}        ┃  ${c5}sh${c0}     ${SHELL_NAME}"
-echo -e "  ┃                      ┃  ${c6}up${c0}     ${UPTIME}"
-echo -e "  ┃   Powered ${c1}by${c0} Linux   ┃  ${c1}ram${c0}    ${RAM}"
-echo -e "  ┃                      ┃  ${c2}disk${c0}   ${DISK}"
+echo -e "  ┃                      ┃  ${c1}  phone${c0} : ${MODEL}"
+echo -e "  ┃        ${c3}( ${c3}• ${c8}ᴗ ${c3}•${c3} )${c0}       ┃  ${c2}     os${c0} : ${OS}"
+echo -e "  ┃         ${c9}( ω )${c8}═══${c0}       ┃  ${c7}    ker${c0} : ${KERNEL}"
+echo -e "  ┃        ${c8}⌐(${c9}_${c8})¬${c0}          ┃  ${c4} device${c0} : $(echo -e "$DEVICE_STATUS")"
+echo -e "  ┃                      ┃  ${c5}     sh${c0} : ${SHELL_NAME}"
+echo -e "  ┃                      ┃  ${c6}     up${c0} : ${UPTIME}"
+echo -e "  ┃   Powered ${c1}by${c0} Linux   ┃  ${c1}    bat${c0} : $(echo -e "$BATTERY")"
+echo -e "  ┃                      ┃  ${c1}    ram${c0} : ${RAM}"
+echo -e "  ┃                      ┃  ${c2}   disk${c0} : ${DISK}"
 echo -e "  ┗━━━━━━━━━━━━━━━━━━━━━━┛  ${c1}━━━${c2}━━━${c3}━━━${c4}━━━${c5}━━━${c6}━━━${c7}━━━"
 echo -e "\n"
 EOF
