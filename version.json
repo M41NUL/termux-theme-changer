@@ -1,5 +1,5 @@
 {
-  "version": "3.0.0",
+  "version": "2.0.0",
   "message": "TTC v3 released — modular update system, cleaner installer.",
   "changelog": [
     "Separated install, update, and main controller into individual files",
