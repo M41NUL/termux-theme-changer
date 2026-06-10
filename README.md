@@ -139,11 +139,10 @@ To release a new update, only `version.json` needs to be changed:
 
 ```json
 {
-  "version": "3.1.0",
-  "message": "What changed in this version."
+  "version": "2.0.0",
+  "message": "Added new features and improvements."
 }
 ```
-
 <br>
 
 ## Auto-Install
