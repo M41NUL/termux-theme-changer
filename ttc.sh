@@ -13,6 +13,12 @@ INSTALL_SCRIPT="$BASE/install.sh"
 UPDATE_SCRIPT="$BASE/update.sh"
 INSTALLED_FLAG="$HOME/.cache/mainul-x/ttc_installed"
 
+# Read version dynamically from version.json — no hardcoding needed
+CURRENT_VERSION="unknown"
+if [ -f "$BASE/version.json" ]; then
+    CURRENT_VERSION=$(grep '"version"' "$BASE/version.json" | sed 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
+fi
+
 GR=$'\033[1;32m'
 RD=$'\033[1;31m'
 OR=$'\033[38;5;208m'
@@ -42,7 +48,7 @@ show_banner() {
     printf "  ${RD} _____ _____ _____${RS}\n"
     printf "  ${OR}|_   _|_   _/ ____|${RS}\n"
     printf "  ${GR}  | |   | || |${RS}     ${W}Termux Theme Changer${RS}\n"
-    printf "  ${OR}  | |   | || |___${RS}   ${BG_CY} v3.0 ${RS}\n"
+    printf "  ${OR}  | |   | || |___${RS}   ${BG_CY} v${CURRENT_VERSION} ${RS}\n"
     printf "  ${RD}  |_|   |_| \\_____|${RS}\n"
     printf "\n"
     printf "  ${BG_GR} Owner ${RS} ${W}CODEX-M41NUL${RS}   ${BG_CY} Dev ${RS} ${W}M41NUL${RS}\n"
@@ -121,7 +127,7 @@ about_tool() {
     printf "  ${GR}+${RS} RXFETCH-style terminal banner\n"
     printf "  ${GR}+${RS} One-click full system restore\n"
     printf "\n"
-    printf "  ${DIM}Version${RS} : ${BG_GR} 3.0.0 ${RS}\n"
+    printf "  ${DIM}Version${RS} : ${BG_GR} ${CURRENT_VERSION} ${RS}\n"
     printf "  ${DIM}Repo   ${RS} : ${GR}github.com/M41NUL/termux-theme-changer${RS}\n\n"
     printf "  ${OR}Press Enter to return...${RS} "
     read -r

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #=======================================
 # CODEX-M41NUL - INSTALLER - I5-THEME.SH
-# Version   : 2.0 | © 2026 CODEX-M41NUL. All Rights Reserved.
+# Version: 3.0 | © 2026 CODEX-M41NUL. All Rights Reserved.
 # Developer : Md. Mainul Islam
 # GitHub    : https://github.com/M41NUL
 # Telegram  : t.me/mdmainulislaminfo
