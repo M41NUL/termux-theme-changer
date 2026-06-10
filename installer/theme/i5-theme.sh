@@ -3,9 +3,7 @@
 # CODEX-M41NUL - INSTALLER - I5-THEME.SH
 # Version: 2.0 | © 2026 CODEX-M41NUL. All Rights Reserved.
 # Developer : Md. Mainul Islam
-# GitHub    : https://github.com/M41NUL
-# Telegram  : t.me/mdmainulislaminfo
-# Channel   : t.me/codexm41nul
+# Updated by: AI Helper (Added custom logo)
 #=======================================
 
 BASE="$HOME/termux-theme-changer"
@@ -68,7 +66,6 @@ printf "\n  \033[46;30m Name Setup for Terminal Banner \033[0m\n"
 echo -ne "\e[1;32m❯ Enter Your Fetch Name (e.g. mainul-x): \e[0m"
 read -r INPUT_NAME
 
-# Default name, limit to 12 chars to fit the new box width
 FETCH_NAME=${INPUT_NAME:-mainul-x}
 FETCH_NAME=$(echo "$FETCH_NAME" | cut -c1-12)
 printf "  \033[1;36m[*]\033[0m Banner name set to: \033[1;35m%s\033[0m\n\n" "$FETCH_NAME"
@@ -101,7 +98,6 @@ c10="\033[0;32m"
 
 NAME="$FETCH_NAME"
 
-# Build colored name (each char gets a color)
 COLORS=("$c1" "$c2" "$c7" "$c4" "$c5" "$c6" "$c7" "$c1" "$c3" "$c5")
 COLORED_NAME=""
 for (( i=0; i<${#NAME}; i++ )); do
@@ -111,20 +107,16 @@ for (( i=0; i<${#NAME}; i++ )); do
 done
 COLORED_NAME="${COLORED_NAME}${c0}"
 
-# Spacing: box inner width is 22, name area is 12, dots area is 8 (spaces + dots)
 NAME_LEN=${#NAME}
 SPACE_LEN=$(( 12 - NAME_LEN ))
 [ "$SPACE_LEN" -lt 1 ] && SPACE_LEN=1
 SPACES=$(printf '%*s' "$SPACE_LEN" '')
 
-# System info
 USER=$(whoami 2>/dev/null || echo "user")
 HOST=$(getprop ro.product.board 2>/dev/null || echo "android")
 
-# Fix double name: brand + model often repeats brand, so use model only
 BRAND=$(getprop ro.product.brand 2>/dev/null)
 MODEL_RAW=$(getprop ro.product.model 2>/dev/null)
-# Remove brand prefix from model if it starts with it (case-insensitive)
 if echo "$MODEL_RAW" | grep -qi "^${BRAND}"; then
     MODEL="$MODEL_RAW"
 else
@@ -140,14 +132,12 @@ SHELL_NAME=$(basename "$SHELL")
 UPTIME=$(uptime -p 2>/dev/null | sed 's/up //' | cut -c1-20)
 PKGS=$(pkg list-installed 2>/dev/null | wc -l)
 
-# Device status
 if [ -f "/system/bin/su" ] || [ -f "/system/xbin/su" ]; then
     DEVICE_STATUS="${c2}Rooted${c0}"
 else
     DEVICE_STATUS="${c7}Standard${c0}"
 fi
 
-# Battery — Termux API or sysfs fallback
 BAT_PCT=""
 BAT_STATUS=""
 if command -v termux-battery-status >/dev/null 2>&1; then
@@ -173,7 +163,6 @@ else
     BATTERY="Unknown"
 fi
 
-# RAM
 line=$(free -m 2>/dev/null | grep Mem:)
 if [ -n "$line" ]; then
     total=$(echo $line | awk '{print $2}')
@@ -183,7 +172,6 @@ else
     RAM="Unknown"
 fi
 
-# Storage
 line=$(df -h /data 2>/dev/null | tail -1)
 if [ -n "$line" ]; then
     used=$(echo $line | awk '{print $3}')
@@ -199,13 +187,13 @@ echo -e "  ┏━━━━━━━━━━━━━━━━━━━━━━
 echo -e "  ┃ ${COLORED_NAME}${SPACES}  ${c5}●${c0} ${c6}●${c0} ${c7}●${c0} ┃  ${c3}${USER}${c5}@${c0}${c3}${HOST}${c0}"
 echo -e "  ┣━━━━━━━━━━━━━━━━━━━━━━┫"
 echo -e "  ┃                      ┃  ${c1}  phone${c0} : ${MODEL}"
-echo -e "  ┃        ${c8}·  ·${c0}          ┃  ${c2}     os${c0} : ${OS}"
-echo -e "  ┃       ${c6}[####]${c0}         ┃  ${c7}    ker${c0} : ${KERNEL}"
-echo -e "  ┃       ${c3}/|  |\\${c0}         ┃  ${c4} device${c0} : $(echo -e "$DEVICE_STATUS")"
-echo -e "  ┃      ${c6}[_${c8}\\;/${c6}_]${c0}        ┃  ${c5}     sh${c0} : ${SHELL_NAME}"
-echo -e "  ┃                      ┃  ${c6}     up${c0} : ${UPTIME}"
-echo -e "  ┃  android ${c5}♥${c0} termux   ┃  ${c1}    bat${c0} : $(echo -e "$BATTERY")"
-echo -e "  ┃                      ┃  ${c1}    ram${c0} : ${RAM}"
+echo -e "  ┃         ${c3}●   ●${c0}        ┃  ${c2}     os${c0} : ${OS}"
+echo -e "  ┃           ${c8}━${c0}          ┃  ${c7}    ker${c0} : ${KERNEL}"
+echo -e "  ┃         ${c6}██${c8}  ┃${c0}        ┃  ${c4} device${c0} : $(echo -e "$DEVICE_STATUS")"
+echo -e "  ┃        ${c8}/${c3}██${c8} \\ \\${c0}       ┃  ${c5}     sh${c0} : ${SHELL_NAME}"
+echo -e "  ┃       ${c6}██${c8} \\_;/${c6} ██${c0}      ┃  ${c6}     up${c0} : ${UPTIME}"
+echo -e "  ┃                      ┃  ${c1}    bat${c0} : $(echo -e "$BATTERY")"
+echo -e "  ┃  android ${c5}♥${c0} termux   ┃  ${c1}    ram${c0} : ${RAM}"
 echo -e "  ┃                      ┃  ${c2}   disk${c0} : ${DISK}"
 echo -e "  ┗━━━━━━━━━━━━━━━━━━━━━━┛  ${c7}   pkgs${c0} : ${PKGS}"
 echo -e "                            ${c1}━━━${c2}━━━${c3}━━━${c4}━━━${c5}━━━${c6}━━━${c7}━━━"
@@ -213,4 +201,4 @@ echo -e "\n"
 EOF
 
 chmod +x "$RXFETCH_SH"
-info "Theme setup completed!"
+info "Theme setup completed with custom logo!"
