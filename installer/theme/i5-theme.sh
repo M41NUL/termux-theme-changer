@@ -3,7 +3,7 @@
 # CODEX-M41NUL - INSTALLER - I5-THEME.SH
 # Version: 2.0 | © 2026 CODEX-M41NUL. All Rights Reserved.
 # Developer : Md. Mainul Islam
-# Updated by: AI Helper (Added custom logo)
+# Updated by: AI Helper (Fixed Logo & Removed Battery)
 #=======================================
 
 BASE="$HOME/termux-theme-changer"
@@ -93,11 +93,8 @@ c5="\033[1;31m"
 c6="\033[1;33m"
 c7="\033[1;36m"
 c8="\033[1;30m"
-c9="\033[0;35m"
-c10="\033[0;32m"
 
 NAME="$FETCH_NAME"
-
 COLORS=("$c1" "$c2" "$c7" "$c4" "$c5" "$c6" "$c7" "$c1" "$c3" "$c5")
 COLORED_NAME=""
 for (( i=0; i<${#NAME}; i++ )); do
@@ -114,72 +111,25 @@ SPACES=$(printf '%*s' "$SPACE_LEN" '')
 
 USER=$(whoami 2>/dev/null || echo "user")
 HOST=$(getprop ro.product.board 2>/dev/null || echo "android")
-
 BRAND=$(getprop ro.product.brand 2>/dev/null)
 MODEL_RAW=$(getprop ro.product.model 2>/dev/null)
-if echo "$MODEL_RAW" | grep -qi "^${BRAND}"; then
-    MODEL="$MODEL_RAW"
-else
-    MODEL="$BRAND $MODEL_RAW"
-fi
-MODEL=$(echo "$MODEL" | awk '{$1=$1;print}' | cut -c1-20)
-
-OS="Android $(getprop ro.build.version.release 2>/dev/null) $(uname -m 2>/dev/null)"
-OS=$(echo "$OS" | awk '{$1=$1;print}' | cut -c1-20)
-
+MODEL=$(echo "$BRAND $MODEL_RAW" | awk '{$1=$1;print}' | cut -c1-20)
+OS="Android $(getprop ro.build.version.release 2>/dev/null)"
 KERNEL=$(uname -r 2>/dev/null | cut -c1-20)
 SHELL_NAME=$(basename "$SHELL")
 UPTIME=$(uptime -p 2>/dev/null | sed 's/up //' | cut -c1-20)
 PKGS=$(pkg list-installed 2>/dev/null | wc -l)
 
+# RAM & Disk Info
+line_mem=$(free -m 2>/dev/null | grep Mem:)
+RAM=$(echo $line_mem | awk '{print $3"MB / "$2"MB"}')
+line_disk=$(df -h /data 2>/dev/null | tail -1)
+DISK=$(echo $line_disk | awk '{print $3" / "$2" ("$5")"}')
+
 if [ -f "/system/bin/su" ] || [ -f "/system/xbin/su" ]; then
     DEVICE_STATUS="${c2}Rooted${c0}"
 else
     DEVICE_STATUS="${c7}Standard${c0}"
-fi
-
-BAT_PCT=""
-BAT_STATUS=""
-if command -v termux-battery-status >/dev/null 2>&1; then
-    BAT_JSON=$(termux-battery-status 2>/dev/null)
-    BAT_PCT=$(echo "$BAT_JSON" | grep '"percentage"' | grep -oP '\d+')
-    BAT_RAW=$(echo "$BAT_JSON" | grep '"status"' | grep -oP '"[A-Z_]+"' | tr -d '"')
-    BAT_STATUS="$BAT_RAW"
-else
-    for p in /sys/class/power_supply/battery /sys/class/power_supply/Battery; do
-        [ -f "$p/capacity" ] && BAT_PCT=$(cat "$p/capacity") && BAT_STATUS=$(cat "$p/status" 2>/dev/null) && break
-    done
-fi
-
-if [ -n "$BAT_PCT" ]; then
-    case "$BAT_STATUS" in
-        Charging|CHARGING)       BAT_ICON="${c2}[charging]${c0}" ;;
-        Full|FULL)               BAT_ICON="${c2}[full]${c0}" ;;
-        Discharging|DISCHARGING) BAT_ICON="${c6}[discharging]${c0}" ;;
-        *)                       BAT_ICON="" ;;
-    esac
-    BATTERY="${BAT_PCT}% $(echo -e "$BAT_ICON")"
-else
-    BATTERY="Unknown"
-fi
-
-line=$(free -m 2>/dev/null | grep Mem:)
-if [ -n "$line" ]; then
-    total=$(echo $line | awk '{print $2}')
-    used=$(echo $line | awk '{print $3}')
-    RAM="${used}MB / ${total}MB"
-else
-    RAM="Unknown"
-fi
-
-line=$(df -h /data 2>/dev/null | tail -1)
-if [ -n "$line" ]; then
-    used=$(echo $line | awk '{print $3}')
-    size=$(echo $line | awk '{print $2}')
-    usep=$(echo $line | awk '{print $5}')
-    DISK="${used}B / ${size}B (${usep})"
-else
-    DISK="Unknown"
 fi
 
 echo -e "\n"
@@ -189,16 +139,15 @@ echo -e "  ┣━━━━━━━━━━━━━━━━━━━━━━
 echo -e "  ┃                      ┃  ${c1}  phone${c0} : ${MODEL}"
 echo -e "  ┃         ${c3}●   ●${c0}        ┃  ${c2}     os${c0} : ${OS}"
 echo -e "  ┃           ${c8}━${c0}          ┃  ${c7}    ker${c0} : ${KERNEL}"
-echo -e "  ┃         ${c6}██${c8}  ┃${c0}        ┃  ${c4} device${c0} : $(echo -e "$DEVICE_STATUS")"
-echo -e "  ┃        ${c8}/${c3}██${c8} \\ \\${c0}       ┃  ${c5}     sh${c0} : ${SHELL_NAME}"
-echo -e "  ┃       ${c6}██${c8} \\_;/${c6} ██${c0}      ┃  ${c6}     up${c0} : ${UPTIME}"
-echo -e "  ┃                      ┃  ${c1}    bat${c0} : $(echo -e "$BATTERY")"
-echo -e "  ┃  android ${c5}♥${c0} termux   ┃  ${c1}    ram${c0} : ${RAM}"
-echo -e "  ┃                      ┃  ${c2}   disk${c0} : ${DISK}"
-echo -e "  ┗━━━━━━━━━━━━━━━━━━━━━━┛  ${c7}   pkgs${c0} : ${PKGS}"
-echo -e "                            ${c1}━━━${c2}━━━${c3}━━━${c4}━━━${c5}━━━${c6}━━━${c7}━━━"
+echo -e "  ┃          ${c6}█${c8}  ┃${c0}        ┃  ${c4} device${c0} : ${DEVICE_STATUS}"
+echo -e "  ┃        ${c3}█${c8}  / \\${c0}        ┃  ${c5}     sh${c0} : ${SHELL_NAME}"
+echo -e "  ┃      ${c6}█${c8} \\_ ; / ${c6}█${c0}      ┃  ${c6}     up${c0} : ${UPTIME}"
+echo -e "  ┃                      ┃  ${c1}    ram${c0} : ${RAM}"
+echo -e "  ┃  android ${c5}♥${c0} termux   ┃  ${c2}   disk${c0} : ${DISK}"
+echo -e "  ┃                      ┃  ${c7}   pkgs${c0} : ${PKGS}"
+echo -e "  ┗━━━━━━━━━━━━━━━━━━━━━━┛  ${c1}━━${c2}━━${c3}━━${c4}━━${c5}━━${c6}━━${c7}━━${c1}━━${c2}━━"
 echo -e "\n"
 EOF
 
 chmod +x "$RXFETCH_SH"
-info "Theme setup completed with custom logo!"
+success "Theme setup completed successfully!"
