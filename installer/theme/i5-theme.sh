@@ -54,7 +54,7 @@ EOF
 
 info "Downloading Font..."
 progress_bar "Installing custom font" 3
-FONT_URL="https://raw.githubusercontent.com/M41NUL/termux-theme-changer/main/Font/font.ttf"
+FONT_URL="https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/JetBrainsMono/Ligatures/Regular/JetBrainsMonoNerdFont-Regular.ttf"
 
 if curl -L --silent --show-error --fail -o "$TERMUX_DIR/font.ttf" "$FONT_URL"; then
     info "Font installed successfully!"
@@ -62,14 +62,14 @@ else
     warn "Failed to download font. Please check internet connection."
 fi
 
-echo -e "\n\e[1;36m┌──────────────────────────────────────────┐\e[0m"
-echo -e "\e[1;36m│\e[0m \e[1;33mName Setup for Terminal Banner\e[0m           \e[1;36m│\e[0m"
-echo -e "\e[1;36m└──────────────────────────────────────────┘\e[0m"
-echo -ne "\e[1;32m❯ Enter Your Fetch Name (e.g. mainul-x): \e[0m"
+BG="\e[44;1;97m"
+RESET="\e[0m"
+
+echo -e "\n${BG}   Name Setup for Terminal Banner   ${RESET}"
+echo -ne "${BG} ❯ Enter Your Fetch Name: ${RESET}"
 read -r INPUT_NAME
 
-# Default name setup and limit character length to 14 to prevent box breaking
-FETCH_NAME=${INPUT_NAME:-mainul-x}
+FETCH_NAME=${INPUT_NAME:-CODEX-M41NUL}
 FETCH_NAME=$(echo "$FETCH_NAME" | cut -c1-14)
 echo -e "\e[1;36m[*] Banner name set to:\e[0m \e[1;35m$FETCH_NAME\e[0m\n"
 
