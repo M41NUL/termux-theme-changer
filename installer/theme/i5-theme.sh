@@ -65,11 +65,17 @@ fi
 echo -e "\n\e[1;36m┌──────────────────────────────────────────┐\e[0m"
 echo -e "\e[1;36m│\e[0m \e[1;33mName Setup for Terminal Banner\e[0m           \e[1;36m│\e[0m"
 echo -e "\e[1;36m└──────────────────────────────────────────┘\e[0m"
-echo -ne "\e[1;32m❯ Enter Your Name (Default: CODEX-M41NUL): \e[0m"
+echo -ne "\e[1;32m❯ Enter Your Name (Default: M41NUL, max 6 chars): \e[0m"
 read -r INPUT_NAME
 
-FETCH_NAME=${INPUT_NAME:-CODEX-M41NUL}
-FETCH_NAME=$(echo "$FETCH_NAME" | cut -c1-14)
+FETCH_NAME=${INPUT_NAME:-M41NUL}
+
+if [ ${#FETCH_NAME} -gt 6 ]; then
+    echo -e "\e[1;31m[✗] Error: Name too long! Maximum 6 characters allowed.\e[0m"
+    echo -e "\e[1;31m[✗] You entered ${#FETCH_NAME} characters: '$FETCH_NAME'\e[0m"
+    exit 1
+fi
+
 echo -e "\e[1;36m[*] Banner name set to:\e[0m \e[1;35m$FETCH_NAME\e[0m\n"
 
 progress_bar "Generating theme scripts" 2
@@ -86,12 +92,28 @@ MY_NAME="$FETCH_NAME"
 EOF
 
 cat >> "$RXFETCH_SH" <<'EOF'
-magenta="\033[1;35m"; green="\033[1;32m"; white="\033[1;37m"
-blue="\033[1;34m"; red="\033[1;31m"; black="\033[1;40;30m"
-yellow="\033[1;33m"; cyan="\033[1;36m"; reset="\033[0m"
-
-c0=${reset}; c1=${magenta}; c2=${green}; c3=${white}; c4=${blue}
-c5=${red}; c6=${yellow}; c7=${cyan}; c8=${black}
+magenta="\033[1;35m"
+green="\033[1;32m"
+white="\033[1;37m"
+blue="\033[1;34m"
+red="\033[1;31m"
+black="\033[1;40;30m"
+yellow="\033[1;33m"
+cyan="\033[1;36m"
+reset="\033[0m"
+bgyellow="\033[1;43;33m"
+bgwhite="\033[1;47;37m"
+c0=${reset}
+c1=${magenta}
+c2=${green}
+c3=${white}
+c4=${blue}
+c5=${red}
+c6=${yellow}
+c7=${cyan}
+c8=${black}
+c9=${bgyellow}
+c10=${bgwhite}
 
 COLORS=($c1 $c2 $c7 $c4 $c5 $c6 $c3)
 COLORED_NAME=""
@@ -107,49 +129,89 @@ GAP=$((22 - NAME_LEN - 7))
 if [ $GAP -lt 1 ]; then GAP=1; fi
 SPACES=$(printf '%*s' "$GAP" '')
 
-getCodeName(){ codename="$(getprop ro.product.board)"; }
-getClientBase(){ client_base="$(getprop ro.com.google.clientidbase)"; }
-getModel(){ 
-    brand=$(getprop ro.product.brand)
-    model_name=$(getprop ro.product.model)
-    model_clean=$(echo "$model_name" | sed "s/^$brand //i")
-    model="$brand $model_clean"
-    model=$(echo "$model" | cut -c1-22)
+function getCodeName() {
+  codename="$(getprop ro.product.board)"
 }
-getDistro(){ os="Android $(getprop ro.build.version.release)"; }
-getKernel(){ kernel="$(uname -r | cut -c1-20)"; }
-getShell(){ shell=$(basename "$SHELL"); }
-getUptime(){ uptime="$(uptime -p | sed 's/up //')"; }
-getMemoryUsage(){
-    line=$(free -m | grep Mem:)
-    total=$(echo $line | awk '{print $2}')
-    used=$(echo $line | awk '{print $3}')
-    memory="${used}MB / ${total}MB"
+
+function getClientBase() {
+  client_base="$(getprop ro.com.google.clientidbase)"
 }
-getDiskUsage(){
-    line=$(df -h /data | tail -1)
-    size=$(echo $line | awk '{print $2}')
-    used=$(echo $line | awk '{print $3}')
-    storage="${used} / ${size}"
+
+function getModel() {
+  brand=$(getprop ro.product.brand)
+  model_name=$(getprop ro.product.model)
+  model_clean=$(echo "$model_name" | sed "s/^$brand //i")
+  model="$brand $model_clean"
+  model=$(echo "$model" | cut -c1-22)
+}
+
+function getDistro() {
+  os="$(uname -o) $(uname -m)"
+}
+
+function getKernel() {
+  kernel="$(uname -r | cut -c1-20)"
+}
+
+function getTotalPackages() {
+  package_manager="$(which {apt,dpkg} 2>/dev/null | grep -v "not found" | awk -F/ 'NR==1{print $NF}')"
+  case "${package_manager}" in
+    "apt" )
+      packages=$(apt list --installed 2>/dev/null | wc -l)
+    ;;
+    "dpkg" )
+      packages=$(dpkg-query -l | wc -l)
+    ;;
+    "" )
+      packages="Unknown"
+    ;;
+  esac
+}
+
+function getShell() {
+  shell="$(basename $SHELL)"
+}
+
+function getUptime() {
+  uptime="$(uptime -p | sed 's/up //')"
+}
+
+function getMemoryUsage() {
+  _MEM="Mem:"
+  _GREP_ONE_ROW="$(free -m | grep "${_MEM}")"
+  _TOTAL="$(echo ${_GREP_ONE_ROW} | awk '{print $2}')"
+  _USED="$(echo ${_GREP_ONE_ROW} | awk '{print $3}')"
+  memory="${_USED}MB / ${_TOTAL}MB"
+}
+
+function getDiskUsage() {
+  _MOUNTED_ON="/data"
+  _GREP_ONE_ROW="$(df -h | grep ${_MOUNTED_ON})"
+  _SIZE="$(echo ${_GREP_ONE_ROW} | awk '{print $2}')"
+  _USED="$(echo ${_GREP_ONE_ROW} | awk '{print $3}')"
+  _AVAIL="$(echo ${_GREP_ONE_ROW} | awk '{print $4}')"
+  _USE="$(echo ${_GREP_ONE_ROW} | awk '{print $5}' | sed 's/%//')"
+  storage="${_USED}B / ${_SIZE}B = ${_AVAIL}B (${_USE}%)"
 }
 
 getCodeName; getClientBase; getModel; getDistro; getKernel
-getShell; getUptime; getMemoryUsage; getDiskUsage
+getTotalPackages; getShell; getUptime; getMemoryUsage; getDiskUsage
 user_host="${c3}${USER}${c5}@${c3}${codename}${c0}"
 
-echo -e "\n"
-echo -e "  ┏━━━━━━━━━━━━━━━━━━━━━━┓  ${user_host}"
-echo -e "  ┃ ${COLORED_NAME}${SPACES}${c5}${c0}  ${c6}${c0}  ${c7}${c0} ┃  ${c1}phone${c0}  ${model}"
-echo -e "  ┣━━━━━━━━━━━━━━━━━━━━━━┫  ${c2}os${c0}     ${os}"
-echo -e "  ┃                      ┃  ${c7}ker${c0}    ${kernel}"
-echo -e "  ┃          ${c3}•${c8}_${c3}•${c0}          ┃  ${c4}sh${c0}     ${shell}"
-echo -e "  ┃          ${c6}oo${c8}|${c0}          ┃  ${c6}up${c0}     ${uptime}"
-echo -e "  ┃         ${c8}/${c3}   ${c8}'\\'${c0}         ┃  ${c1}ram${c0}    ${memory}"
-echo -e "  ┃        ${c6}(${c8}\\_;/${c6})${c0}         ┃  ${c2}disk${c0}   ${storage}"
+echo -e "\n\n"
+echo -e "  ┏━━━━━━━━━━━━━━━━━━━━━━┓"
+echo -e "  ┃ ${COLORED_NAME}${SPACES}${c5}${c0}  ${c6}${c0}  ${c7}${c0} ┃  ${user_host}"
+echo -e "  ┣━━━━━━━━━━━━━━━━━━━━━━┫  ${c1}phone${c0}  ${model}"
+echo -e "  ┃                      ┃  ${c2}os${c0}     ${os}"
+echo -e "  ┃          ${c3}•${c8}_${c3}•${c0}         ┃  ${c7}ker${c0}    ${kernel}"
+echo -e "  ┃          ${c8}${c9}oo${c0}${c8}|${c0}         ┃  ${c4}pkgs${c0}   ${packages}"
+echo -e "  ┃         ${c8}/${c10} ${c0}${c8}'\'${c0}        ┃  ${c5}sh${c0}     ${shell}"
+echo -e "  ┃        ${c9}(${c8}\_;/${c9})${c0}        ┃  ${c6}up${c0}     ${uptime}"
+echo -e "  ┃                      ┃  ${c1}ram${c0}    ${memory}"
+echo -e "  ┃   android ${c1}${c0} termux   ┃  ${c2}disk${c0}   ${storage}"
 echo -e "  ┃                      ┃"
-echo -e "  ┃   Powered ${c1}by${c0} Linux   ┃  ${c1}━━━${c2}━━━${c3}━━━${c4}━━━${c5}━━━${c6}━━━${c7}━━━"
-echo -e "  ┗━━━━━━━━━━━━━━━━━━━━━━┛"
-echo -e "\n"
+echo -e "  ┗━━━━━━━━━━━━━━━━━━━━━━┛  ${c1}━━━${c2}━━━${c3}━━━${c4}━━━${c5}━━━${c6}━━━${c7}━━━"
+echo -e "\n\n"
 EOF
 
 chmod +x "$RXFETCH_SH"
