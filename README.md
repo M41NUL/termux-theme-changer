@@ -1,53 +1,12 @@
-<div align="center">
-
-<h1>Termux Theme Changer (TTC)</h1>
-
-<p align="center">
-  <a href="https://www.zsh.org/" target="_blank">
-    <img src="https://img.shields.io/badge/Shell-zsh-339933?style=for-the-badge&logo=gnu&logoColor=white" alt="Shell zsh" />
-  </a>
-  <a href="https://www.gnu.org/software/bash/" target="_blank">
-    <img src="https://img.shields.io/badge/Bash-5.2-339933?style=for-the-badge&logo=gnu-bash&logoColor=white" alt="Bash 5.2" />
-  </a>
-  <a href="https://github.com/M41NUL/termux-theme-changer/stargazers" target="_blank">
-    <img src="https://img.shields.io/github/stars/M41NUL/termux-theme-changer?style=for-the-badge&logo=github&labelColor=181717&color=EDEDED&logoColor=white" alt="GitHub Stars" />
-  </a>
-  <a href="https://github.com/M41NUL/termux-theme-changer/network/members" target="_blank">
-    <img src="https://img.shields.io/github/forks/M41NUL/termux-theme-changer?style=for-the-badge&logo=github&labelColor=181717&color=EDEDED&logoColor=white" alt="GitHub Forks" />
-  </a>
-  <a href="https://github.com/M41NUL/termux-theme-changer/blob/main/LICENSE" target="_blank">
-    <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" alt="License MIT" />
-  </a>
+ <p align="center">
+  <img src="https://raw.githubusercontent.com/M41NUL/termux-theme-changer/main/img/Termux-Customization.png" alt="Termux Customization" width="900">
 </p>
-
 <p align="center">
-  <a href="https://t.me/mdmainulislaminfo" target="_blank">
-    <img src="https://img.shields.io/badge/Telegram-29A9EB?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram" />
-  </a>
-  <a href="https://t.me/codexm41nul" target="_blank">
-    <img src="https://img.shields.io/badge/TG%20Channel-codexm41nul-29A9EB?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram Channel" />
-  </a>
-  <a href="https://t.me/codex_m41nul" target="_blank">
-    <img src="https://img.shields.io/badge/TG%20Group-codex__m41nul-29A9EB?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram Group" />
-  </a>
-  <a href="https://wa.me/8801308850528" target="_blank">
-    <img src="https://img.shields.io/badge/WhatsApp-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="WhatsApp" />
-  </a>
-  <a href="https://youtube.com/@codexm41nul" target="_blank">
-    <img src="https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="YouTube" />
-  </a>
-  <a href="mailto:devmainulislam@gmail.com" target="_blank">
-    <img src="https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email" />
-  </a>
+  <img src="https://img.shields.io/github/stars/M41NUL/termux-theme-changer?style=flat&logo=github" alt="Stars">
+  <img src="https://img.shields.io/github/forks/M41NUL/termux-theme-changer?style=flat&logo=github" alt="Forks">
+  <img src="https://img.shields.io/badge/ZSH-Shell-339933?style=flat&logo=gnu&logoColor=white" alt="zsh">
+  <img src="https://img.shields.io/badge/Bash-5.2-339933?style=flat&logo=gnu-bash&logoColor=white" alt="bash">
 </p>
-
-<br>
-
-<img src="https://raw.githubusercontent.com/M41NUL/termux-theme-changer/main/Startup%20Display.png" width="600px" alt="TTC Startup Screen">
-
-</div>
-
-<br>
 
 ## Overview
 
@@ -257,26 +216,29 @@ termux-theme-changer/
 
 ## Developer
 
-| | |
-|---|---|
-| **Name** | Md. Mainul Islam |
-| **Alias** | CODEX-M41NUL |
-| **GitHub** | [@M41NUL](https://github.com/M41NUL) |
-| **Telegram** | [t.me/mdmainulislaminfo](https://t.me/mdmainulislaminfo) |
-| **TG Channel** | [t.me/codexm41nul](https://t.me/codexm41nul) |
-| **TG Group** | [t.me/codex_m41nul](https://t.me/codex_m41nul) |
-| **YouTube** | [youtube.com/@codexm41nul](https://youtube.com/@codexm41nul) |
-| **WhatsApp** | [+8801308850528](https://wa.me/8801308850528) |
-| **Email** | [devmainulislam@gmail.com](mailto:devmainulislam@gmail.com) |
-
-<br>
-
-## License
-
-[MIT](LICENSE)
+<p align="center">
+  <a href="https://github.com/M41NUL">
+    <img src="https://img.shields.io/badge/GitHub-M41NUL-181717?style=flat-square&logo=github" alt="GitHub">
+  </a>
+  <a href="https://t.me/mdmainulislaminfo">
+    <img src="https://img.shields.io/badge/Telegram-Mainul-26A5E4?style=flat-square&logo=telegram&logoColor=white" alt="Telegram">
+  </a>
+  <a href="https://t.me/codexm41nul">
+    <img src="https://img.shields.io/badge/Channel-CODEX--M41NUL-26A5E4?style=flat-square&logo=telegram&logoColor=white" alt="Channel">
+  </a>
+  <a href="https://t.me/codex_m41nul">
+    <img src="https://img.shields.io/badge/Group-codex__m41nul-26A5E4?style=flat-square&logo=telegram&logoColor=white" alt="Group">
+  </a>
+  <a href="https://youtube.com/@codexm41nul">
+    <img src="https://img.shields.io/badge/YouTube-CODEX--M41NUL-FF0000?style=flat-square&logo=youtube&logoColor=white" alt="YouTube">
+  </a>
+  <a href="mailto:devmainulislam@gmail.com">
+    <img src="https://img.shields.io/badge/Email-Contact-D14836?style=flat-square&logo=gmail&logoColor=white" alt="Email">
+  </a>
+</p>
 
 ---
 
-<div align="center">
+<p align="center">
   <sub>© 2026 CODEX-M41NUL. All Rights Reserved.</sub>
-</div>
+</p>
