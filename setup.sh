@@ -83,10 +83,13 @@ fi
 # ── 6. Done ──
 echo ""
 echo -e "  ${C}╔══════════════════════════════════════════╗${RESET}"
-echo -e "  ${C}║${RESET}       ${G}SETUP COMPLETE! READY TO USE.${RESET}       ${C}║${RESET}"
+echo -e "  ${C}║${RESET}       ${G}SETUP COMPLETE! LAUNCHING TTC...${RESET}     ${C}║${RESET}"
 echo -e "  ${C}╠══════════════════════════════════════════╣${RESET}"
-echo -e "  ${C}║${RESET}  ${Y}▶ Type:${RESET}  ${W}ttc${RESET}  to launch the tool          ${C}║${RESET}"
 echo -e "  ${C}║${RESET}  ${Y}▶ Auto-update runs on every launch${RESET}       ${C}║${RESET}"
 echo -e "  ${C}║${RESET}  ${Y}▶ GitHub:${RESET} ${C}github.com/M41NUL${RESET}              ${C}║${RESET}"
 echo -e "  ${C}╚══════════════════════════════════════════╝${RESET}"
 echo ""
+sleep 1.5
+
+# ── 7. Auto-launch main menu ──
+exec bash "$BASE/ttc.sh"
