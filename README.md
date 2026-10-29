@@ -1,4 +1,4 @@
- <p align="center">
+ <p align="center"> 
   <img src="https://raw.githubusercontent.com/M41NUL/termux-theme-changer/main/img/Termux-Customization.png" alt="Termux Customization" width="900">
 </p>
 <p align="center">
