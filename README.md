@@ -236,7 +236,7 @@ termux-theme-changer/
   </a>
 </p>
 
----
+--- 
 
 <p align="center">
   <sub>© 2026 CODEX-M41NUL. All Rights Reserved.</sub>
